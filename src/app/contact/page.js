@@ -240,7 +240,7 @@ const sendEmail = async (e) => {
                 <FaPhoneAlt className="text-blue-600 text-2xl" />
                 <div>
                   <p className="text-gray-800 font-semibold">Phone</p>
-                  <p className="text-gray-600">+63 917 194 0015</p>
+                  <p className="text-gray-600">+63 917 628 9839</p>
                 </div>
               </div>
 
@@ -248,7 +248,7 @@ const sendEmail = async (e) => {
                 <FaEnvelope className="text-blue-600 text-2xl" />
                 <div>
                   <p className="text-gray-800 font-semibold">Email</p>
-                  <p className="text-gray-600">inquiry@elsphilippines.com</p>
+                  <p className="text-gray-600">Elsevents35@gmail.com</p>
                 </div>
               </div>
 
