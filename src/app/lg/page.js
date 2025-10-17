@@ -184,7 +184,13 @@ export default function LgPage() {
               Washer & Dryer
             </p>
             <p className="text-gray-700 text-lg leading-relaxed">
-              <span className="font-semibold">Contact No:</span> 0917-194-0028
+              <span className="font-semibold">Contact No:</span> 
+                <a
+                  href="viber://chat?number=09761337196"
+                  className="text-blue-600 hover:underline"
+                >
+                  0917-194-0028 (Viber)
+                </a>
             </p>
           </motion.div>
         </div>

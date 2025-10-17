@@ -189,7 +189,13 @@ export default function ProLsPage() {
                 Professional Laundry Solutions (ProLS)
               </p>
               <p>
-                <span className="font-semibold">Contact No:</span> 0917-194-0018
+                <span className="font-semibold">Contact No:</span> 
+                <a
+                  href="viber://chat?number=09761337196"
+                  className="text-blue-600 hover:underline"
+                >
+                  0917-194-0018 (Viber)
+                </a>
               </p>
             </div>
           </motion.div>
