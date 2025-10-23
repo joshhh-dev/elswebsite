@@ -57,7 +57,7 @@ export default function Footer() {
             <li>
               <span className="font-medium">Email: </span>
               <a
-                href="mailto:info@elsphilippines.com"
+                href="mailto:elsinquiries38@gmail.com"
                 className="text-blue-600 hover:underline"
               >
                 info@elsphilippines.com

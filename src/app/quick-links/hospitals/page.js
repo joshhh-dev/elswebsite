@@ -1,9 +1,127 @@
-import React from 'react'
+"use client";
+import React from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function HospitalsPage() {
+  const features = [
+    {
+      title: "Hygienic Barrier Washing Systems",
+      description:
+        "Prevent cross-contamination with barrier washers that separate clean and soiled zones — ensuring the highest hygiene standards for hospitals and clinics.",
+      image: "/images/healthcare-barrier.jpg",
+    },
+    {
+      title: "Disinfection & Sterilization Cycles",
+      description:
+        "Custom wash programs with thermal and chemical disinfection eliminate bacteria, viruses, and pathogens from medical textiles and uniforms.",
+      image: "/images/healthcare-sterile.jpg",
+    },
+    {
+      title: "Smart Monitoring & Traceability",
+      description:
+        "Track each laundry load in real time with integrated monitoring systems, ensuring compliance and accountability in every wash cycle.",
+      image: "/images/healthcare-monitoring.jpg",
+    },
+  ];
+
   return (
-    <div>
-      
-    </div>
-  )
+    <main className="min-h-screen flex flex-col items-center bg-gray-50 text-gray-800">
+      {/* ===== HERO SECTION ===== */}
+      <section className="relative w-full h-[60vh] flex items-center justify-center overflow-hidden">
+        <Image
+          src="/images/hospital-hero.jpg"
+          alt="Healthcare Laundry Hero"
+          fill
+          className="object-cover brightness-75"
+        />
+        <div className="relative z-10 text-center text-black px-6">
+          <motion.h1
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl md:text-6xl font-bold mb-4"
+          >
+            Laundry Solutions for Healthcare
+          </motion.h1>
+          <p className="text-lg md:text-xl font-light max-w-2xl mx-auto">
+            Engineered for hospitals and medical facilities — where hygiene,
+            safety, and reliability are non-negotiable.
+          </p>
+        </div>
+      </section>
+
+      {/* ===== INTRODUCTION ===== */}
+      <section className="max-w-5xl mx-auto px-6 py-16 leading-relaxed text-center">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="text-lg text-gray-600"
+        >
+          In healthcare, laundry isn’t just about cleanliness — it’s about
+          infection prevention, patient comfort, and operational reliability.
+          Our healthcare-grade laundry systems are designed to meet the strict
+          hygiene requirements of hospitals, clinics, and laboratories while
+          maintaining efficiency and sustainability.
+        </motion.p>
+      </section>
+
+      {/* ===== FEATURES SECTION ===== */}
+      <section className="bg-white w-full py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center text-gray-800">
+            Why Choose Our Healthcare Laundry Systems
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {features.map((item, index) => (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.3 }}
+                className="bg-gray-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg"
+              >
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  width={400}
+                  height={250}
+                  className="object-cover w-full h-48"
+                />
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-3 text-gray-800">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CALL TO ACTION ===== */}
+      <section className="relative w-full py-20 bg-gradient-to-r from-green-700 to-green-600 text-white text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl mx-auto px-6"
+        >
+          <h2 className="text-3xl font-bold mb-4">
+            Prioritize Hygiene with Medical-Grade Laundry Systems
+          </h2>
+          <p className="mb-8 text-lg">
+            Protect your patients, staff, and reputation with reliable laundry
+            solutions that meet global healthcare standards.
+          </p>
+          <button className="bg-white text-green-700 font-semibold py-3 px-8 rounded-full shadow-md hover:bg-gray-100 transition">
+            Contact Us for a Consultation
+          </button>
+        </motion.div>
+      </section>
+    </main>
+  );
 }
