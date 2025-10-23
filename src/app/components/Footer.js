@@ -2,22 +2,41 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FaFacebookF, FaInstagram } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { FaFacebookF, FaInstagram, FaArrowRight } from "react-icons/fa";
 
 export default function Footer() {
+  const quickLinks = [
+    { name: "About Us", href: "../quick-links/about" },
+    { name: "Articles", href: "../quick-links/article" },
+    { name: "Laundry for Hospitality (HoReCa)", href: "../quick-links/horeca" },
+    { name: "Laundry for Healthcare (Hospitals)", href: "../quick-links/hospitals" },
+    { name: "Laundry for Spas, Gyms, and Salons", href: "../quick-links/spa" },
+    { name: "Laundry for Firefighters", href: "../quick-links/firefighters" },
+    { name: "Lagoon Professional", href: "../quick-links/lagoonP" },
+    { name: "Preventive Maintenance Program", href: "../quick-links/pms" },
+    {name: "Contact Us", href: "../quick-links/contact" },
+
+  ];
+
   return (
-    <footer className="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-700 border-t border-gray-200 py-14 px-6 md:px-14 lg:px-24">
-      {/* Top Grid */}
+    <motion.footer
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.8 }}
+      className="bg-white/90 backdrop-blur-sm text-gray-700 border-t border-gray-200 py-14 px-6 md:px-14 lg:px-24"
+    >
+      {/* ==== Top Grid ==== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-        {/* ==== Left Section - Logo & Company Info ==== */}
+        {/* ==== Left Section - Logo & Info ==== */}
         <div>
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-[-12px] mb-5">
             <Image
-              src="/assets/ELS_PLAIN_COLORED.png"
+              src="/assets/ELS_Logo_Brand.jpg"
               alt="ELS Logo"
               width={60}
               height={60}
-              className="rounded-md shadow-sm"
             />
             <h3 className="text-xl font-bold tracking-wide text-gray-800">
               ELS Philippines Inc.
@@ -59,23 +78,21 @@ export default function Footer() {
           <h3 className="text-lg font-semibold mb-4 text-gray-800">
             Quick Links
           </h3>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-sm text-gray-600">
-            {[
-              "About Us",
-              "Articles",
-              "Laundry for Hospitality (HoReCa)",
-              "Laundry for Healthcare (Hospitals)",
-              "Laundry for Spas, Gyms, and Salons",
-              "Laundry for Firefighters",
-              "Lagoon Professional",
-              "Preventive Maintenance Program",
-            ].map((item, idx) => (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 text-sm text-gray-600">
+            {quickLinks.map(({ name, href }, idx) => (
               <li key={idx}>
                 <Link
-                  href="#"
-                  className="hover:text-blue-600 transition-colors duration-200"
+                  href={href}
+                  className="group flex items-center hover:text-blue-600 transition-all duration-200"
                 >
-                  {item}
+                  <FaArrowRight
+                    size={10}
+                    className="mr-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                  />
+                  <span className="relative">
+                    {name}
+                    <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+                  </span>
                 </Link>
               </li>
             ))}
@@ -89,7 +106,7 @@ export default function Footer() {
           © {new Date().getFullYear()} ELS Phils., Inc. – All Rights Reserved.
         </p>
 
-        {/* Social Links */}
+        {/* ==== Social Links ==== */}
         <div className="flex space-x-5 mt-4 md:mt-0">
           <Link
             href="https://www.facebook.com/lagoonprofessional"
@@ -101,7 +118,7 @@ export default function Footer() {
             <FaFacebookF size={18} />
           </Link>
           <Link
-            href="https://www.instagram.com/"
+            href="https://www.instagram.com/elsphilsinc"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Visit our Instagram"
@@ -111,6 +128,6 @@ export default function Footer() {
           </Link>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function ArticlePage() {
+export default function LaundriesPage() {
   return (
     <div>
       

@@ -139,7 +139,7 @@ export default function HomePage() {
           className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-6 w-full max-w-2xl"
         >
           <Link
-            href="/about"
+            href="/quick-links/about"
             className="flex-1 text-center px-12 py-6 text-xl font-semibold bg-white text-black rounded-xl shadow-lg hover:scale-105 hover:bg-gray-200 transition-transform"
           >
             About Us
