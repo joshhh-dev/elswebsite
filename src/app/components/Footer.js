@@ -60,7 +60,7 @@ export default function Footer() {
                 href="mailto:elsinquiries38@gmail.com"
                 className="text-blue-600 hover:underline"
               >
-                info@elsphilippines.com
+                elsinquiries38@gmail.com
               </a>
             </li>
             <li>Customer Inquiry: (+63) 917 128 0215</li>
