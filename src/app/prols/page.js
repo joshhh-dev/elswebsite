@@ -118,7 +118,6 @@ export default function ProLsPage() {
             className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl"
           >
             <motion.div
-              whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
               className="w-full h-full"
             >

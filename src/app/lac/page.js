@@ -129,7 +129,6 @@ export default function LacPage() {
           >
             <motion.div
               initial={{ scale: 1 }}
-              whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
               className="w-full h-full"
             >
@@ -208,7 +207,10 @@ export default function LacPage() {
         </div>
       </motion.section>
 
-      <Footer />
+      {/* ===== Footer ===== */}
+      <div className="bg-white">
+        <Footer />
+      </div>
     </main>
   );
 }

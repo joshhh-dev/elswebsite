@@ -129,7 +129,7 @@ export default function AboutPage() {
       </section>
 
       {/* ==== MISSION & VISION ==== */}
-      <section className="py-20 px-6 md:px-14 lg:px-24 bg-gradient-to-b from-white to-blue-100">
+      <section className="py-16 sm:py-20 px-4 sm:px-8 md:px-14 lg:px-24 bg-gradient-to-b from-white to-blue-100">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -137,11 +137,11 @@ export default function AboutPage() {
           transition={{ duration: 1 }}
           className="max-w-6xl mx-auto text-center"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-14">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-10 sm:mb-14">
             Our Mission & Vision
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
             {[
               {
                 title: "Mission",
@@ -160,16 +160,16 @@ export default function AboutPage() {
                 transition={{ duration: 0.8, delay: index * 0.2 }}
                 className="relative group bg-white rounded-3xl shadow-lg overflow-hidden cursor-pointer border border-gray-200"
               >
-                {/* Front card */}
-                <div className="p-10 bg-gradient-to-t from-blue-50 to-white h-full flex flex-col justify-center items-center transition-all duration-500 group-hover:translate-y-[-100%]">
-                  <h3 className="text-2xl font-semibold text-gray-800 mb-2">
+                <div className="p-8 sm:p-10 bg-gradient-to-t from-blue-50 to-white h-full flex flex-col justify-center items-center transition-all duration-500 group-hover:translate-y-[-100%]">
+                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
                     {item.title}
                   </h3>
                 </div>
 
-                {/* Reveal info */}
-                <div className="absolute inset-0 p-10 bg-blue-600 text-white flex flex-col justify-center items-center transition-all duration-700 translate-y-full group-hover:translate-y-0">
-                  <p className="text-base leading-relaxed">{item.text}</p>
+                <div className="absolute inset-0 p-8 sm:p-10 bg-blue-600 text-white flex flex-col justify-center items-center transition-all duration-700 translate-y-full group-hover:translate-y-0">
+                  <p className="text-sm sm:text-base leading-relaxed">
+                    {item.text}
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -177,56 +177,56 @@ export default function AboutPage() {
         </motion.div>
       </section>
 
-{/* ==== PRODUCT CARDS ==== */}
-<motion.section
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true, amount: 0.2 }}
-  transition={{ duration: 0.8 }}
-  className="py-24 px-6 md:px-14 lg:px-24 bg-gradient-to-b from-blue-100 to-white"
->
-  <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-12 text-center">
-    ELS Philippines Products
-  </h2>
-
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 justify-items-center">
-    {productDetails.map((product, index) => (
-      <motion.div
-        key={index}
-        whileHover={{ scale: 1.03 }}
-        transition={{ duration: 0.3 }}
-        className="group perspective w-full h-96 max-w-sm"
+      {/* ==== PRODUCT CARDS ==== */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.8 }}
+        className="py-20 px-4 sm:px-8 md:px-14 lg:px-24 bg-gradient-to-b from-blue-100 to-white"
       >
-        <div className="relative w-full h-full text-center transition-transform duration-[1000ms] transform-style-preserve-3d group-hover:rotate-y-180 shadow-xl rounded-2xl">
-          {/* Front */}
-          <div className="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 backface-hidden rounded-2xl">
-            <Image
-              src={product.image}
-              alt={product.productName}
-              width={300}
-              height={300}
-              priority={index} // only preload first few images
-              className="rounded-xl mb-4 object-cover shadow-lg transition-transform duration-300 hover:scale-105"
-            />
-            <h3 className="text-lg font-semibold text-gray-800 text-center">
-              {product.productName}
-            </h3>
-          </div>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-10 sm:mb-12 text-center">
+          ELS Philippines Products
+        </h2>
 
-          {/* Back */}
-          <div className="absolute inset-0 bg-blue-600 text-white rounded-2xl p-6 backface-hidden rotate-y-180 flex flex-col justify-center items-center">
-            <h3 className="text-lg font-bold mb-2">
-              {product.productName}
-            </h3>
-            <p className="text-sm leading-relaxed">{product.description}</p>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 justify-items-center">
+          {productDetails.map((product, index) => (
+            <motion.div
+              key={index}
+              whileHover={{ scale: 1.03 }}
+              transition={{ duration: 0.3 }}
+              className="group perspective w-full h-[360px] sm:h-96 max-w-sm"
+            >
+              <div className="relative w-full h-full text-center transition-transform duration-[1000ms] transform-style-preserve-3d group-hover:rotate-y-180 shadow-xl rounded-2xl">
+                {/* Front */}
+                <div className="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 backface-hidden rounded-2xl">
+                  <Image
+                    src={product.image}
+                    alt={product.productName}
+                    width={300}
+                    height={300}
+                    priority={index}
+                    className="rounded-xl mb-4 object-cover shadow-lg transition-transform duration-300 hover:scale-105" 
+                    />
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center">
+                    {product.productName}
+                  </h3>
+                </div>
+
+                {/* Back */}
+                <div className="absolute inset-0 bg-blue-600 text-white rounded-2xl p-6 backface-hidden rotate-y-180 flex flex-col justify-center items-center">
+                  <h3 className="text-base sm:text-lg font-bold mb-2">
+                    {product.productName}
+                  </h3>
+                  <p className="text-xs sm:text-sm leading-relaxed px-2">
+                    {product.description}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
-      </motion.div>
-    ))}
-  </div>
-</motion.section>
-
-
+      </motion.section>
       <Footer />
     </div>
   );
