@@ -37,7 +37,7 @@ export default function Header() {
         }`}
     >
       {/* ===== Logo ===== */}
-<Link href="/" className="relative w-[150px] h-[80px] cursor-pointer group">
+`<Link href="/" className="relative w-[250px] h-[80px] sm:w-[150px] sm:h-[80px] cursor-pointer group">
 
   {/* Text/logo on top */}
   <Image
@@ -45,21 +45,18 @@ export default function Header() {
     alt="ELS Text"
     width={160}
     height={80}
-    className="absolute top-[-35] left-[80px] cursor-pointer transition-transform duration-500 group-hover:scale-110"
+    className="absolute top-[-31] right-[88px] cursor-pointer transition-transform duration-500 group-hover:scale-110"
   />
 
   {/* Background circle/logo */}
   <Image
     src="/assets/els_logo_spin.png"
     alt="ELS Circle"
-    width={114}
+    width={125}
     height={80}
-    className="absolute top-2 left-0 cursor-pointer transition-transform duration-500 group-hover:scale-110 group-hover:rotate-360"    style={{ transformOrigin: "center" }}
+    className="absolute top-2 right-51 cursor-pointer transition-transform duration-500 group-hover:scale-110 group-hover:rotate-360"    style={{ transformOrigin: "center" }}
   />
-</Link>
-
-
-
+</Link>`
 
 
       {/* ===== Desktop Navigation ===== */}
