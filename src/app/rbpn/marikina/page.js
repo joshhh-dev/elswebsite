@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function Lucky8Page() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function MarikinaPage() {
+  return <RbpnDealerPage slug="marikina" />;
 }

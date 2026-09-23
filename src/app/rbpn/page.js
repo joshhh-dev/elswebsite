@@ -3,33 +3,18 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
+import DealerAvatar from "../components/DealerAvatar";
+import { rbpnDealers } from "@/lib/rbpnDealers";
 
 export default function FindADealerPage() {
-  const dealers = [
-    { name: "MRP Laundry Setup", logo: "/assets/partner1.png", location: "Manila", slug: "manila" },
-    { name: "Lucky 8 Laundry", logo: "/assets/partner2.png", location: "Marikina", slug: "marikina" },
-    { name: "BigZe Corporation", logo: "/assets/partner3.png", location: "Quezon City", slug: "quezoncity" },
-    { name: "One RockFord Industries", logo: "/assets/partner1.png", location: "Laguna", slug: "laguna" },
-    { name: "Integrated Biz Solutions", logo: "/assets/partner1.png", location: "Cavite", slug: "cavite" },
-    { name: "Bubble Bee Laundry", logo: "/assets/partner1.png", location: "Pampanga", slug: "pampanga" },
-    { name: "LabaXpress", logo: "/assets/partner1.png", location: "Pangasinan", slug: "pangasina" },
-    { name: "HannWash", logo: "/assets/partner1.png", location: "Naga", slug: "naga" },
-    { name: "Electro Multi Sales and Services", logo: "/assets/partner1.png", location: "Cebu", slug: "cebu" },
-    { name: "Esprutinkle Laundry", logo: "/assets/partner1.png", location: "Antique", slug: "antique" },
-    { name: "Laba Box", logo: "/assets/partner1.png", location: "Davao", slug: "davao" },
-    { name: "Laundries Laundry", logo: "/assets/partner1.png", location: "Valenzuela", slug: "valenzuela" },
-    { name: "Spotless", logo: "/assets/partner1.png", location: "Bataan", slug: "bataan" },
-    { name: "JAMS Laundry Supplies and Equipment", logo: "/assets/partner1.png", location: "Ilo-Ilo", slug: "ilo-ilo" },
-    { name: "Racines Corporation", logo: "/assets/partner1.png", location: "Batangas", slug: "batangas" },
-    { name: "UCAN Laundry Self-Service Laundromat", logo: "/assets/partner1.png", location: "Bohol", slug: "bohol" },
-    { name: "Quezon Laundry Machine Trading", logo: "/assets/partner1.png", location: "Quezon Province", slug: "quezonprovince" },
-    { name: "WISH WASH Laundry", logo: "/assets/partner1.png", location: "Tarlac", slug: "tarlac" },
-    { name: "Prime Kinetic - Laundry Setup-PH", logo: "/assets/partner1.png", location: "Bulacan", slug: "bulacan" },
-  ];
+  const dealers = rbpnDealers.map((dealer) => ({
+    name: dealer.company,
+    location: dealer.area,
+    slug: dealer.slug,
+  }));
 
     const [showTypewriter, setShowTypewriter] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
@@ -61,7 +46,7 @@ export default function FindADealerPage() {
 
 
 {/* Header Section */}
-<section className="relative flex flex-col items-center justify-start px-4 text-center min-h-[80vh] md:min-h-[90vh] overflow-hidden pt-12 md:pt-20">
+<section className="relative flex flex-col items-center justify-start px-4 text-center min-h-[80vh] md:min-h-[90vh] overflow-hidden pt-20 md:pt-32">
 
   {/* Background Image with smooth transition */}
   <motion.div
@@ -133,12 +118,10 @@ export default function FindADealerPage() {
             >
               <Link href={`/rbpn/${dealer.slug}`} className="no-underline">
                 <div className="flex flex-col items-center">
-                  <Image
-                    src={dealer.logo}
-                    alt={dealer.name}
-                    width={100}
-                    height={100}
-                    className="rounded-full mb-4 object-cover w-[90px] h-[90px] sm:w-[120px] sm:h-[120px]"
+                  <DealerAvatar
+                    name={dealer.name}
+                    size={100}
+                    className="mb-4 w-[90px] h-[90px] sm:w-[120px] sm:h-[120px]"
                   />
                   <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center">
                     {dealer.name}
@@ -204,9 +187,6 @@ export default function FindADealerPage() {
         </motion.div>
       )}
     </AnimatePresence>
-
-
-      <Footer />
     </main>
   );
 }

@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function QLMTPage() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function QuezonProvincePage() {
+  return <RbpnDealerPage slug="quezonprovince" />;
 }

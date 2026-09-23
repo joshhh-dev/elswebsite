@@ -1,34 +1,34 @@
 // app/api/inquiry/route.js
-import nodemailer from "nodemailer";
+import { adminDb } from "@/lib/firebaseAdmin";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(req) {
+  let user_name, user_email, message, dealerSlug, phone;
   try {
-    const { user_name, user_email, message } = await req.json();
+    ({ user_name, user_email, message, dealerSlug, phone } = await req.json());
+  } catch (parseError) {
+    console.error("Invalid request body:", parseError);
+    return new Response(JSON.stringify({ success: false }), { status: 400 });
+  }
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
-      },
+  if (!dealerSlug) {
+    return new Response(JSON.stringify({ success: false }), { status: 400 });
+  }
+
+  try {
+    await adminDb.collection("inquiries").add({
+      dealerSlug,
+      name: user_name,
+      email: user_email,
+      phone: phone || "",
+      message,
+      contacted: false,
+      done: false,
+      createdAt: FieldValue.serverTimestamp(),
     });
-
-    await transporter.sendMail({
-      from: user_email,
-      to: process.env.GMAIL_USER,
-      subject: `New RBPN Inquiry from ${user_name}`,
-      html: `
-        <h3>New RBPN Inquiry Received</h3>
-        <p><strong>Name:</strong> ${user_name}</p>
-        <p><strong>Email:</strong> ${user_email}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
-      `,
-    });
-
     return new Response(JSON.stringify({ success: true }), { status: 200 });
-  } catch (error) {
-    console.error("Email sending error:", error);
+  } catch (firestoreError) {
+    console.error("Firestore inquiry write error:", firestoreError);
     return new Response(JSON.stringify({ success: false }), { status: 500 });
   }
 }

@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
 import { motion } from "framer-motion";
+import ProductInquiryForm from "../components/ProductInquiryForm";
 
 export default function ScarpaPage() {
   const listVariants = {
@@ -21,8 +20,6 @@ export default function ScarpaPage() {
 
   return (
     <main className="relative min-h-screen flex flex-col overflow-hidden">
-      <Header />
-
       {/* ===== HERO SECTION ===== */}
       <motion.section
         initial={{ scale: 1.05, opacity: 0 }}
@@ -194,7 +191,7 @@ export default function ScarpaPage() {
         </div>
       </motion.section>
 
-      <Footer />
+      <ProductInquiryForm product="Scarpavapor" />
     </main>
   );
 }

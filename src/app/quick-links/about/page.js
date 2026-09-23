@@ -1,12 +1,19 @@
 "use client";
 
-import React from "react";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
 export default function AboutPage() {
+  // Tap-to-flip state (index-based) — hover-only flip cards don't work on
+  // touch devices, so a click/tap toggle is used for both card sections.
+  const [flippedMissionVision, setFlippedMissionVision] = useState(null);
+  const [flippedProduct, setFlippedProduct] = useState(null);
+
+  const toggleFlip = (setter, index) => {
+    setter((current) => (current === index ? null : index));
+  };
+
   const productDetails = [
     {
       productName: "Laundry Management Systems",
@@ -42,8 +49,6 @@ export default function AboutPage() {
 
   return (
     <div className="relative flex flex-col min-h-screen bg-gray-50 text-gray-800">
-      <Header />
-
       {/* ==== HERO SECTION ==== */}
       <section className="relative flex flex-col items-center justify-center text-center py-32 px-7 overflow-hidden">
         <div className="absolute inset-0">
@@ -151,28 +156,51 @@ export default function AboutPage() {
                 title: "Vision",
                 text: "To be the most innovative leader in the laundry and cleaning industry, offering reliable products and services that give customers the best solutions for their needs.",
               },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 100 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
-                className="relative group bg-white rounded-3xl shadow-lg overflow-hidden cursor-pointer border border-gray-200"
-              >
-                <div className="p-8 sm:p-10 bg-gradient-to-t from-blue-50 to-white h-full flex flex-col justify-center items-center transition-all duration-500 group-hover:translate-y-[-100%]">
-                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
-                    {item.title}
-                  </h3>
-                </div>
+            ].map((item, index) => {
+              const isFlipped = flippedMissionVision === index;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 100 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isFlipped}
+                  aria-label={`${item.title} — tap to ${isFlipped ? "hide" : "show"} details`}
+                  onClick={() => toggleFlip(setFlippedMissionVision, index)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      toggleFlip(setFlippedMissionVision, index);
+                    }
+                  }}
+                  className="group relative bg-white rounded-3xl shadow-lg overflow-hidden cursor-pointer border border-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                >
+                  <div
+                    className={`p-8 sm:p-10 bg-gradient-to-t from-blue-50 to-white h-full flex flex-col justify-center items-center transition-all duration-500 ${
+                      isFlipped ? "-translate-y-full" : "translate-y-0"
+                    } sm:group-hover:-translate-y-full`}
+                  >
+                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
+                      {item.title}
+                    </h3>
+                    <span className="text-xs text-gray-400 mt-2 sm:hidden">Tap to read more</span>
+                  </div>
 
-                <div className="absolute inset-0 p-8 sm:p-10 bg-blue-600 text-white flex flex-col justify-center items-center transition-all duration-700 translate-y-full group-hover:translate-y-0">
-                  <p className="text-sm sm:text-base leading-relaxed">
-                    {item.text}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+                  <div
+                    className={`absolute inset-0 p-8 sm:p-10 bg-blue-600 text-white flex flex-col justify-center items-center transition-all duration-700 ${
+                      isFlipped ? "translate-y-0" : "translate-y-full"
+                    } sm:group-hover:translate-y-0`}
+                  >
+                    <p className="text-sm sm:text-base leading-relaxed">
+                      {item.text}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
       </section>
@@ -190,44 +218,62 @@ export default function AboutPage() {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 justify-items-center">
-          {productDetails.map((product, index) => (
-            <motion.div
-              key={index}
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.3 }}
-              className="group perspective w-full h-[360px] sm:h-96 max-w-sm"
-            >
-              <div className="relative w-full h-full text-center transition-transform duration-[1000ms] transform-style-preserve-3d group-hover:rotate-y-180 shadow-xl rounded-2xl">
-                {/* Front */}
-                <div className="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 backface-hidden rounded-2xl">
-                  <Image
-                    src={product.image}
-                    alt={product.productName}
-                    width={300}
-                    height={300}
-                    priority={index}
-                    className="rounded-xl mb-4 object-cover shadow-lg transition-transform duration-300 hover:scale-105" 
+          {productDetails.map((product, index) => {
+            const isFlipped = flippedProduct === index;
+            return (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.3 }}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isFlipped}
+                aria-label={`${product.productName} — tap to ${isFlipped ? "hide" : "show"} details`}
+                onClick={() => toggleFlip(setFlippedProduct, index)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleFlip(setFlippedProduct, index);
+                  }
+                }}
+                className="group perspective w-full h-[360px] sm:h-96 max-w-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-2xl"
+              >
+                <div
+                  className={`relative w-full h-full text-center transition-transform duration-[1000ms] transform-style-preserve-3d shadow-xl rounded-2xl ${
+                    isFlipped ? "rotate-y-180" : ""
+                  } sm:group-hover:rotate-y-180`}
+                >
+                  {/* Front */}
+                  <div className="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 backface-hidden rounded-2xl">
+                    <Image
+                      src={product.image}
+                      alt={product.productName}
+                      width={300}
+                      height={300}
+                      priority={index}
+                      className="rounded-xl mb-4 object-cover shadow-lg"
                     />
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center">
-                    {product.productName}
-                  </h3>
-                </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center">
+                      {product.productName}
+                    </h3>
+                    <span className="text-xs text-gray-400 mt-2 sm:hidden">Tap to read more</span>
+                  </div>
 
-                {/* Back */}
-                <div className="absolute inset-0 bg-blue-600 text-white rounded-2xl p-6 backface-hidden rotate-y-180 flex flex-col justify-center items-center">
-                  <h3 className="text-base sm:text-lg font-bold mb-2">
-                    {product.productName}
-                  </h3>
-                  <p className="text-xs sm:text-sm leading-relaxed px-2">
-                    {product.description}
-                  </p>
+                  {/* Back */}
+                  <div className="absolute inset-0 bg-blue-600 text-white rounded-2xl p-6 backface-hidden rotate-y-180 flex flex-col justify-center items-center">
+                    <h3 className="text-base sm:text-lg font-bold mb-2">
+                      {product.productName}
+                    </h3>
+                    <p className="text-xs sm:text-sm leading-relaxed px-2">
+                      {product.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       </motion.section>
-      <Footer />
     </div>
   );
 }

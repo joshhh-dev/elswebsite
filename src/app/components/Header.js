@@ -4,13 +4,31 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
+
+const PRODUCT_LINKS = [
+  { href: "/lg", label: "LG" },
+  { href: "/scarpavapor", label: "Scarpavapor" },
+  { href: "/prols", label: "ProLS" },
+  { href: "/lac", label: "LAC" },
+  { href: "/lms", label: "LMS" },
+];
+
+const NAV_LINKS = [
+  { href: "/rbpn", label: "Find a Dealer" },
+  { href: "/announcements", label: "Announcements" },
+  { href: "/quick-links/about", label: "About" },
+  { href: "/quick-links/contact", label: "Contact" },
+];
 
 export default function Header() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const closeTimer = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -18,125 +36,218 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { href: "/lg", label: "LG" },
-    { href: "/scarpavapor", label: "SCARPAVAPOR" },
-    { href: "/prols", label: "ProLS" },
-    { href: "/lac", label: "LAC" },
-    { href: "/lms", label: "LMS" },
-  ];
+  const isProductActive = PRODUCT_LINKS.some((link) => link.href === pathname);
+
+  const openProducts = () => {
+    clearTimeout(closeTimer.current);
+    setProductsOpen(true);
+  };
+  const scheduleCloseProducts = () => {
+    closeTimer.current = setTimeout(() => setProductsOpen(false), 150);
+  };
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 flex items-center justify-between
-        px-6 md:px-16 py-5 transition-all duration-500 ease-in-out
-        ${
-          isScrolled
-            ? "bg-gradient-to-b from-black/90 via-black/70 "
-            : "bg-gradient-to-b from-black/60 via-black/30 to-transparent"
-        }`}
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${
+        isScrolled
+          ? "bg-gradient-to-b from-black/90 via-black/70 to-black/40"
+          : "bg-gradient-to-b from-black/60 via-black/30 to-transparent"
+      }`}
     >
-      {/* ===== Logo ===== */}
-`<Link href="/" className="relative w-[250px] h-[80px] sm:w-[150px] sm:h-[80px] cursor-pointer group">
+      <div className="flex items-center px-6 md:px-10 py-4 md:py-6">
+        {/* ===== Logo (left) ===== */}
+        <Link href="/" className="flex items-center -space-x-2 shrink-0 group">
+          <Image
+            src="/assets/els_logo_spin.png"
+            alt="ELS Circle"
+            width={125}
+            height={80}
+            className="h-14 w-14 md:h-16 md:w-16 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-360"
+            style={{ transformOrigin: "center" }}
+          />
+          <Image
+            src="/assets/no_logo.png"
+            alt="ELS Philippines Inc."
+            width={160}
+            height={80}
+            // no_logo.png is a white wordmark — legible over the dark hero
+            // images this transparent header floats above; may need a dark
+            // variant later for pages whose top is light-colored.
+            className="h-10 md:h-12 w-auto cursor-pointer transition-transform duration-500 group-hover:scale-110"
+          />
+        </Link>
 
-  {/* Text/logo on top */}
-  <Image
-    src="/assets/no_logo.png"
-    alt="ELS Text"
-    width={160}
-    height={80}
-    className="absolute top-[-31] right-[88px] cursor-pointer transition-transform duration-500 group-hover:scale-110"
-  />
+        {/* ===== Desktop nav (right side) ===== */}
+        <nav className="hidden md:flex items-center gap-8 ml-auto">
+          <Link
+            href="/rbpn"
+            className={`text-sm font-medium tracking-wide transition-colors ${
+              pathname === "/rbpn" ? "text-white" : "text-gray-300 hover:text-white"
+            }`}
+          >
+            Find a Dealer
+          </Link>
 
-  {/* Background circle/logo */}
-  <Image
-    src="/assets/els_logo_spin.png"
-    alt="ELS Circle"
-    width={125}
-    height={80}
-    className="absolute top-2 right-51 cursor-pointer transition-transform duration-500 group-hover:scale-110 group-hover:rotate-360"    style={{ transformOrigin: "center" }}
-  />
-</Link>`
+          {/* ===== Products dropdown ===== */}
+          <div
+            className="relative"
+            onMouseEnter={openProducts}
+            onMouseLeave={scheduleCloseProducts}
+          >
+            <button
+              onClick={() => setProductsOpen((v) => !v)}
+              className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors ${
+                isProductActive ? "text-white" : "text-gray-300 hover:text-white"
+              }`}
+              aria-expanded={productsOpen}
+            >
+              Products
+              <ChevronDown
+                size={16}
+                className={`transition-transform duration-300 ${productsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
 
-
-      {/* ===== Desktop Navigation ===== */}
-      <nav className="hidden md:flex space-x-10 relative">
-        {navLinks.map((link) => {
-          const isActive = pathname === link.href;
-          return (
-            <div key={link.href} className="relative pb-2">
-              <Link
-                href={link.href}
-                className={`text-base md:text-lg font-medium tracking-wide transition-colors ${
-                  isActive ? "text-white" : "text-gray-300 hover:text-white"
-                }`}
-              >
-                {link.label}
-              </Link>
-
-              {/* Underline animation */}
-              {isActive && (
+            <AnimatePresence>
+              {productsOpen && (
                 <motion.div
-                  layoutId="underline"
-                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-400 to-cyan-300 rounded-full shadow-[0_0_8px_rgba(0,200,255,0.5)]"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute left-0 top-full mt-3 w-52 rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden"
+                >
+                  {PRODUCT_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`block px-4 py-3 text-sm font-medium transition-colors ${
+                        pathname === link.href
+                          ? "text-white bg-white/10"
+                          : "text-gray-300 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </motion.div>
               )}
-            </div>
-          );
-        })}
-      </nav>
+            </AnimatePresence>
+          </div>
 
-      {/* ===== Mobile Menu Button ===== */}
-      <button
-        className="md:hidden text-white focus:outline-none"
-        onClick={() => setMenuOpen(!menuOpen)}
-      >
-        {menuOpen ? <X size={28} /> : <Menu size={28} />}
-      </button>
+          <Link
+            href="/announcements"
+            className={`text-sm font-medium tracking-wide transition-colors ${
+              pathname === "/announcements" ? "text-white" : "text-gray-300 hover:text-white"
+            }`}
+          >
+            Announcements
+          </Link>
 
-      {/* ===== Full-Screen Mobile Menu ===== */}
+          <Link
+            href="/quick-links/about"
+            className={`text-sm font-medium tracking-wide transition-colors ${
+              pathname === "/quick-links/about" ? "text-white" : "text-gray-300 hover:text-white"
+            }`}
+          >
+            About
+          </Link>
+
+          <Link
+            href="/quick-links/contact"
+            className={`text-sm font-medium tracking-wide transition-colors ${
+              pathname === "/quick-links/contact" ? "text-white" : "text-gray-300 hover:text-white"
+            }`}
+          >
+            Contact
+          </Link>
+        </nav>
+
+        {/* ===== Mobile Menu Button ===== */}
+        <button
+          className="md:hidden ml-auto text-white focus:outline-none"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X size={26} /> : <Menu size={26} />}
+        </button>
+      </div>
+
+      {/* ===== Mobile Menu (slide-down panel) ===== */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
             key="mobile-menu"
-            initial={{ x: "100%", opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: "100%", opacity: 0 }}
-            transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            className="fixed inset-0 z-40 bg-black/95 backdrop-blur-lg flex flex-col items-center justify-center space-y-8 text-center md:hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="md:hidden overflow-hidden bg-brand-navy border-t border-white/10"
           >
-            {/* Close Button */}
-            <button
-              className="absolute top-6 right-6 text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              <X size={32} />
-            </button>
-
-            {/* Navigation Links */}
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <motion.div
+            <div className="flex flex-col px-6 py-4">
+              {NAV_LINKS.slice(0, 1).map((link) => (
+                <Link
                   key={link.href}
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`py-3 text-base font-medium border-b border-white/10 ${
+                    pathname === link.href ? "text-white" : "text-gray-300"
+                  }`}
                 >
-                  <Link
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className={`text-2xl font-semibold transition-colors ${
-                      isActive
-                        ? "text-white underline underline-offset-4"
-                        : "text-gray-300 hover:text-white"
-                    }`}
+                  {link.label}
+                </Link>
+              ))}
+
+              {/* Products (expandable) */}
+              <button
+                onClick={() => setMobileProductsOpen((v) => !v)}
+                className={`flex items-center justify-between py-3 text-base font-medium border-b border-white/10 ${
+                  isProductActive ? "text-white" : "text-gray-300"
+                }`}
+              >
+                Products
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform duration-300 ${mobileProductsOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {mobileProductsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex flex-col overflow-hidden bg-white/5 rounded-lg my-2"
                   >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              );
-            })}
+                    {PRODUCT_LINKS.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMenuOpen(false)}
+                        className={`px-4 py-2.5 text-sm font-medium ${
+                          pathname === link.href ? "text-white" : "text-gray-300"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {NAV_LINKS.slice(1).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`py-3 text-base font-medium border-b border-white/10 last:border-b-0 ${
+                    pathname === link.href ? "text-white" : "text-gray-300"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

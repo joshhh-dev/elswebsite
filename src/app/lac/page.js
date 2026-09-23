@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import ProductInquiryForm from "../components/ProductInquiryForm";
 
 export default function LacPage() {
   // Variants for animated list
@@ -21,9 +20,7 @@ export default function LacPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex flex-col overflow-hidden pt-[40px]">
-      <Header />
-
+    <main className="relative min-h-screen flex flex-col overflow-hidden">
       {/* ===== Animated Background ===== */}
       <motion.div
         initial={{ scale: 1.05, opacity: 0 }}
@@ -207,10 +204,7 @@ export default function LacPage() {
         </div>
       </motion.section>
 
-      {/* ===== Footer ===== */}
-      <div className="bg-white">
-        <Footer />
-      </div>
+      <ProductInquiryForm product="LAC" />
     </main>
   );
 }

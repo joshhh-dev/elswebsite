@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function EMSPage() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function CebuPage() {
+  return <RbpnDealerPage slug="cebu" />;
 }

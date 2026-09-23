@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import ProductInquiryForm from "../components/ProductInquiryForm";
 
 export default function LgPage() {
   // Variants for animated list
@@ -22,8 +21,6 @@ export default function LgPage() {
 
   return (
     <main className="relative flex flex-col overflow-hidden">
-      <Header />
-
       {/* ===== HERO SECTION (Full-Screen Background) ===== */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 md:px-12">
         {/* Background Image */}
@@ -194,8 +191,8 @@ export default function LgPage() {
           </motion.div>
         </div>
       </motion.section>
-      
-      <Footer />
+
+      <ProductInquiryForm product="LG" />
     </main>
   );
 }

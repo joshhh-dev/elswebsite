@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function BubbleBeePage() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function PampangaPage() {
+  return <RbpnDealerPage slug="pampanga" />;
 }

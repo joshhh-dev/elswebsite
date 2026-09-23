@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import ProductInquiryForm from "../components/ProductInquiryForm";
 
 export default function ProLsPage() {
   const listVariants = {
@@ -21,8 +20,6 @@ export default function ProLsPage() {
 
   return (
     <main className="relative flex flex-col min-h-screen overflow-hidden text-gray-800">
-      <Header />
-
       {/* ===== HERO SECTION ===== */}
       <motion.section
         initial={{ scale: 1.05, opacity: 0 }}
@@ -201,7 +198,7 @@ export default function ProLsPage() {
         </div>
       </motion.section>
 
-      <Footer />
+      <ProductInquiryForm product="ProLS" />
     </main>
   );
 }

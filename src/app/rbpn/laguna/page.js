@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function ORIPage() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function LagunaPage() {
+  return <RbpnDealerPage slug="laguna" />;
 }

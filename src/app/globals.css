@@ -1,38 +1,56 @@
 @import "tailwindcss";
 
+/* =====================================================
+   ELS Philippines — Design Tokens
+   Single source of truth for brand color/spacing/radius.
+   ===================================================== */
 :root {
   --background: #ffffff;
-  --foreground: #f2ecec;
-}
-.dark {
-  --background: #fff4f4;
-  --foreground: #ededed;
+  --foreground: #171717;
+
+  /* Brand palette */
+  --brand-navy: #0b2545;   /* primary — headers, dark sections */
+  --brand-blue: #1d4ed8;   /* primary action */
+  --brand-blue-dark: #1e3a8a;
+  --brand-cyan: #22d3ee;   /* accent, underline/active states */
+  --brand-teal: #0d9488;   /* secondary accent */
+
+  --surface-muted: #f8fafc;
+  --border-muted: #e2e8f0;
+
+  --radius-card: 1rem;
+  --radius-pill: 999px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-dark: var(--brand-blue-dark);
+  --color-brand-cyan: var(--brand-cyan);
+  --color-brand-teal: var(--brand-teal);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-muted: var(--border-muted);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
 header {
   transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
 }
 
+/* =====================================================
+   Animations & utilities
+   ===================================================== */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(1.02); }
   to { opacity: 1; transform: scale(1); }
@@ -48,125 +66,116 @@ header {
   }
 
   /* Toastify custom design */
-.Toastify__toast-theme--colored.Toastify__toast--success {
-  background: linear-gradient(135deg, #2563eb, #1e40af);
-  border-radius: 16px !important;
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
-  text-align: center;
-  padding: 16px !important;
-}
-
-.Toastify__toast-icon svg {
-  color: #fff !important;
-}
-
-.Toastify__progress-bar--success {
-  background: #93c5fd !important;
-}
-.perspective {
-  perspective: 1200px;
-}
-
-.transform-style-preserve-3d {
-  transform-style: preserve-3d;
-}
-
-.backface-hidden {
-  backface-visibility: hidden;
-}
-
-.rotate-y-180 {
-  transform: rotateY(180deg);
-}
-.flip-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform 0.8s ease-in-out;
-}
-
-.flip-card:hover .flip-card-inner {
-  transform: rotateY(180deg);
-}
-
-.flip-card-front,
-.flip-card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 1rem;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.flip-card-front {
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.flip-card-back {
-  background: #2563eb;
-  color: #fff;
-  transform: rotateY(180deg);
-  -webkit-font-smoothing: subpixel-antialiased;
-  -moz-osx-font-smoothing: auto;
-  text-rendering: optimizeLegibility;
-  will-change: transform;
-  transform: rotateY(180deg) translateZ(1px);
-}
-
-@keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
+  .Toastify__toast-theme--colored.Toastify__toast--success {
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px rgba(29, 78, 216, 0.3);
+    text-align: center;
+    padding: 16px !important;
   }
-  50% {
-    background-position: 100% 50%;
+
+  .Toastify__toast-icon svg {
+    color: #fff !important;
   }
-  100% {
-    background-position: 0% 50%;
+
+  .Toastify__progress-bar--success {
+    background: #93c5fd !important;
   }
-}
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradientMove 8s ease infinite;
-}
+  .perspective {
+    perspective: 1200px;
+  }
 
-@keyframes typing {
-  from { width: 0; }
-  to { width: 35ch; } /* adjust to the length of your text */
-}
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
 
-@keyframes blink {
-  50% { border-color: transparent; }
-}
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
 
-.animate-typing {
-  display: inline-block;
-  overflow: hidden;
-  white-space: nowrap;
-  border-right: 2px solid white; /* cursor */
-  width: 0;
-  animation: 
-    typing 4s steps(35, end) forwards, /* type out text */
-    blink 0.7s step-end infinite;      /* blinking cursor */
-}
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
 
-@keyframes fadeIn {
-  to { opacity: 1; }
-}
+  /* Flip card: hover on pointer devices, .is-flipped class for tap/click (mobile) */
+  .flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s ease-in-out;
+  }
 
+  @media (hover: hover) and (pointer: fine) {
+    .flip-card:hover .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+  }
 
+  .flip-card.is-flipped .flip-card-inner {
+    transform: rotateY(180deg);
+  }
 
+  .flip-card-front,
+  .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-card);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .flip-card-front {
+    background: #ffffff;
+  }
+
+  .flip-card-back {
+    background: var(--brand-blue);
+    color: #fff;
+    transform: rotateY(180deg);
+    -webkit-font-smoothing: subpixel-antialiased;
+    text-rendering: optimizeLegibility;
+    will-change: transform;
+    transform: rotateY(180deg) translateZ(1px);
+  }
+
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+  }
+
+  @keyframes typing {
+    from { width: 0; }
+    to { width: min(35ch, 92vw); }
+  }
+
+  @keyframes blink {
+    50% { border-color: transparent; }
+  }
+
+  .animate-typing {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid white;
+    width: 0;
+    animation:
+      typing 4s steps(35, end) forwards,
+      blink 0.7s step-end infinite;
+  }
 }

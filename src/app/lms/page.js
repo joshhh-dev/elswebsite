@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
 import { motion } from "framer-motion";
+import ProductInquiryForm from "../components/ProductInquiryForm";
 
 export default function LmsPage() {
   const listVariants = {
@@ -17,9 +16,7 @@ export default function LmsPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex flex-col overflow-hidden pt-[100px]">
-      <Header />
-
+    <main className="relative min-h-screen flex flex-col overflow-hidden">
       {/* ===== HERO BACKGROUND ===== */}
       <motion.div
         initial={{ opacity: 0, scale: 1.05 }}
@@ -197,10 +194,7 @@ export default function LmsPage() {
         </div>
       </motion.section>
 
-      {/* ===== Footer ===== */}
-      <div className="bg-white">
-        <Footer />
-      </div>
+      <ProductInquiryForm product="LMS" />
     </main>
   );
 }

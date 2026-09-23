@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function JamsPage() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function IloIloPage() {
+  return <RbpnDealerPage slug="ilo-ilo" />;
 }

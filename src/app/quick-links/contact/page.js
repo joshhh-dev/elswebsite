@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaPaperPlane } from "react-icons/fa";
 import { toast, ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Footer from "../../components/Footer";
 
 export default function ContactUsPage() {
   const form = useRef();
@@ -69,7 +68,7 @@ export default function ContactUsPage() {
         className="text-center py-20 px-6 md:px-12 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 text-white"
       >
         <h1 className="text-4xl md:text-6xl font-extrabold mb-4">
-          Contact <span className="text-white-400">ELS Philippines Inc.</span>
+          Contact <span className="text-blue-300">ELS Philippines Inc.</span>
         </h1>
         <p className="text-lg md:text-2xl max-w-3xl mx-auto text-gray-200">
           Have a question about our products, services, or need expert advice?
@@ -246,8 +245,6 @@ export default function ContactUsPage() {
           </motion.div>
         </div>
       </motion.section>
-
-      <Footer />
     </main>
   );
 }

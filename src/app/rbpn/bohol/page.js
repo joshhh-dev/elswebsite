@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function UcanPage() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function BoholPage() {
+  return <RbpnDealerPage slug="bohol" />;
 }

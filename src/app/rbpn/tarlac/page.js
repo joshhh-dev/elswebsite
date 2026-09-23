@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function WishWashPage() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function TarlacPage() {
+  return <RbpnDealerPage slug="tarlac" />;
 }

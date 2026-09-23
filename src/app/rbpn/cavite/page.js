@@ -1,9 +1,5 @@
-import React from 'react'
+import RbpnDealerPage from "@/app/components/RbpnDealerPage";
 
-export default function IBSPage() {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function CavitePage() {
+  return <RbpnDealerPage slug="cavite" />;
 }
