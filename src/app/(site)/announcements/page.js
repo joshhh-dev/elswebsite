@@ -1,4 +1,5 @@
 import { adminDb } from "@/lib/firebaseAdmin";
+import ContentBlock from "@/app/components/ContentBlock";
 
 export const metadata = {
   title: "Announcements | ELS Philippines Inc.",
@@ -18,30 +19,6 @@ function formatDate(timestamp) {
   return timestamp.toDate().toLocaleDateString("en-PH", {
     dateStyle: "long",
   });
-}
-
-function PostBlock({ block, index }) {
-  if (block.type === "text") {
-    return (
-      <p key={index} className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-        {block.content}
-      </p>
-    );
-  }
-  if (block.type === "image" && block.url) {
-    return (
-      <figure key={index}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={block.url} alt={block.caption || ""} className="w-full h-auto rounded-xl" />
-        {block.caption && (
-          <figcaption className="text-sm text-gray-500 mt-2 text-center">
-            {block.caption}
-          </figcaption>
-        )}
-      </figure>
-    );
-  }
-  return null;
 }
 
 export default async function AnnouncementsPage() {
@@ -77,7 +54,7 @@ export default async function AnnouncementsPage() {
                 </div>
 
                 {(post.blocks || []).map((block, i) => (
-                  <PostBlock key={i} block={block} index={i} />
+                  <ContentBlock key={i} block={block} index={i} />
                 ))}
               </article>
             ))}

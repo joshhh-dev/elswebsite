@@ -1,7 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,13 +16,14 @@ export const metadata = {
   description: "Start your laundry business like a veteran.",
 };
 
+// Intentionally bare — the public site's chrome (Header/Footer + nav data
+// fetch) lives in (site)/layout.js instead, so /dashboard and /login (which
+// sit outside that route group) don't get the marketing Header/Footer.
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}>
-        <Header />
-        <div className="flex-1">{children}</div>
-        <Footer />
+        {children}
       </body>
     </html>
   );

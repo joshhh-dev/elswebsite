@@ -20,6 +20,14 @@
 
   --radius-card: 1rem;
   --radius-pill: 999px;
+
+  /* Dashboard (admin area) palette — ported from rbpn-dealer-portal.
+     --brand-navy/--brand-blue above already match its values exactly. */
+  --bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
 }
 
 @theme inline {
@@ -177,5 +185,843 @@ header {
     animation:
       typing 4s steps(35, end) forwards,
       blink 0.7s step-end infinite;
+  }
+}
+
+/* =====================================================
+   Dashboard (admin area: /login, /dashboard/*)
+   Ported as-is from rbpn-dealer-portal — scoped under .admin-portal
+   (instead of rbpn's original `body`/`*`/`a` resets) so it can't affect
+   the public site's styling.
+   ===================================================== */
+.admin-portal {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.admin-portal a {
+  color: inherit;
+}
+
+.page-center {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(11, 37, 69, 0.08);
+}
+
+@media (max-width: 480px) {
+  .page-center {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 24px 20px;
+  }
+}
+
+.card h1 {
+  font-size: 1.5rem;
+  margin: 0 0 4px;
+  color: var(--brand-navy);
+}
+
+.card .subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0 0 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+}
+
+.btn-primary {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: var(--brand-blue);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 12px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--brand-navy);
+  color: white;
+}
+
+.topbar .brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar button {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    padding: 12px 16px;
+  }
+
+  .topbar .brand {
+    font-size: 0.9rem;
+  }
+}
+
+/* Only the dashboard's content area (admin-main), or for Inquiries, just
+   the prospect list itself, should scroll — topbar and both sidebars stay
+   put. dashboard-shell pins the viewport height; admin-shell/admin-main
+   carve out the scrollable region below the topbar. */
+.dashboard-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-shell {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dashboard-sidebar {
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 12px;
+  background: var(--brand-navy);
+  overflow-y: auto;
+}
+
+.dashboard-sidebar a {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dashboard-sidebar a.active {
+  color: white;
+  background: var(--brand-blue);
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Below this width, a vertical sidebar eats too much horizontal space —
+   becomes a horizontally-scrollable strip along the top instead, same
+   treatment as .partner-sidebar inside the Inquiries page. */
+@media (max-width: 900px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+
+  .dashboard-sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: visible;
+    width: 100%;
+    flex: none;
+    flex-shrink: 0;
+  }
+
+  .dashboard-sidebar a {
+    flex-shrink: 0;
+  }
+}
+
+.dashboard {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+@media (max-width: 480px) {
+  .dashboard {
+    padding: 20px 16px;
+  }
+}
+
+.dashboard-layout {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  overflow: hidden;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  gap: 24px;
+}
+
+.dashboard-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The actual prospect list — the only thing in the dashboard that scrolls.
+   status-filter-bar above it (flex-shrink: 0) and the partner-sidebar stay
+   put. */
+.inquiry-list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+
+.partner-sidebar {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.partner-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.partner-item span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.partner-item:hover {
+  background: var(--bg);
+}
+
+.partner-item.active {
+  background: var(--brand-blue);
+  color: white;
+}
+
+.new-count-badge {
+  flex-shrink: 0;
+  background: #dc2626;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 999px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.partner-item.active .new-count-badge {
+  background: white;
+  color: var(--brand-blue);
+}
+
+/* Covers phones AND portrait tablets (e.g. iPad portrait ~768-820px) — a
+   thin vertical sidebar feels cramped at those widths, so it becomes a
+   horizontally-scrollable strip along the top instead. Landscape
+   tablets/desktop (>900px) keep the fixed-width vertical sidebar. */
+@media (max-width: 900px) {
+  .dashboard-layout {
+    flex-direction: column;
+    padding: 20px 16px;
+  }
+
+  .partner-sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: visible;
+    width: 100%;
+    flex: none;
+    flex-shrink: 0;
+  }
+
+  .partner-item {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+.empty-state {
+  background: var(--card-bg);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state h2 {
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.inquiry-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+
+.inquiry-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.inquiry-summary-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.inquiry-preview {
+  color: var(--text-muted);
+  margin: 4px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dealer-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.product-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* The specific product (under a department) the customer picked on the
+   inquiry form — distinct from .product-tag, which is the department. */
+.product-item-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.inquiry-summary-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .inquiry-summary {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .inquiry-summary-side {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    align-self: stretch;
+  }
+
+  .inquiry-date {
+    margin-left: auto;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.status-badge.status-on {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* Inquiry pipeline stages */
+.status-badge.status-stage-new {
+  background: #f3f4f6;
+  color: var(--text-muted);
+}
+
+.status-badge.status-stage-contacted {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-badge.status-stage-quoted {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.status-stage-won {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.status-stage-lost {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Inquiries list — status filter bar */
+.status-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.status-filter-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.status-filter-btn.active {
+  border-color: transparent;
+  color: white;
+  background: var(--brand-blue);
+}
+
+.status-filter-btn.status-stage-new.active { background: #6b7280; }
+.status-filter-btn.status-stage-contacted.active { background: #1d4ed8; }
+.status-filter-btn.status-stage-quoted.active { background: #b45309; }
+.status-filter-btn.status-stage-won.active { background: #166534; }
+.status-filter-btn.status-stage-lost.active { background: #991b1b; }
+
+.location-filter-select {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* Admin Overview — stat cards */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--text-muted);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.stat-card-new {
+  border-top-color: var(--text-muted);
+}
+
+.stat-card-contacted {
+  border-top-color: #1d4ed8;
+}
+
+.stat-card-quoted {
+  border-top-color: #92400e;
+}
+
+.stat-card-won {
+  border-top-color: #166534;
+}
+
+.stat-card-lost {
+  border-top-color: #991b1b;
+}
+
+.inquiry-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.inquiry-detail {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.inquiry-message-full {
+  white-space: pre-wrap;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.inquiry-contact-line {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0 0 16px;
+}
+
+.inquiry-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-toggle-btn {
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.status-toggle-btn.active {
+  background: #dcfce7;
+  border-color: #166534;
+  color: #166534;
+}
+
+/* Admin-only: reassign which RBPN partner a prospect belongs to */
+.inquiry-reassign {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.inquiry-reassign label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.inquiry-reassign select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: white;
+}
+
+.inquiry-reassign-note {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ===== Posts / Announcements / Products (dashboard editors) ===== */
+
+.posts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.posts-header h2 {
+  margin: 0;
+  color: var(--text);
+}
+
+.posts-new-btn {
+  width: auto;
+}
+
+.post-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.back-link {
+  display: inline-block;
+  background: none;
+  border: none;
+  color: var(--brand-blue);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.post-editor {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.post-editor .field input {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.post-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.block-editor {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--bg);
+}
+
+.block-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.block-remove-btn {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.block-editor textarea,
+.block-editor input[type="text"] {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.block-image-preview {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.post-add-block-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.post-editor-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.post-editor-actions .btn-primary {
+  width: auto;
+  flex: 1 1 140px;
+}
+
+.danger-btn {
+  border: 1px solid #dc2626;
+  background: white;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .post-editor {
+    padding: 16px;
+  }
+
+  .post-editor-actions .btn-primary {
+    flex: 1 1 100%;
   }
 }

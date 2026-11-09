@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Post images — publicly viewable (elswebsite displays them to
+    // everyone), but only an admin can upload/replace/remove them.
+    match /posts/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    // Default deny everything else.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

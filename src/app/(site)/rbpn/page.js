@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
-import DealerAvatar from "../components/DealerAvatar";
+import DealerAvatar from "../../components/DealerAvatar";
 import { rbpnDealers } from "@/lib/rbpnDealers";
 
 export default function FindADealerPage() {

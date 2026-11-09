@@ -12,19 +12,23 @@ const FEATURES = [
 ];
 
 /**
- * Reusable "Inquire about this product" form — dropped into each product
- * page (LG, Scarpavapor, ProLS, LAC, LMS) with a fixed `product` label.
- * The customer only picks their location; the server (/api/product-inquiry)
- * figures out which RBPN partner to route the inquiry to (exact area match,
- * or nearest by distance) — see src/lib/matchDealer.js.
+ * Reusable "Inquire about this department" form — dropped into each
+ * department page (LG, Scarpavapor, ProLS, LAC, LMS) with a fixed `product`
+ * (department name) label. If the department has specific products listed
+ * (`items`), the customer must pick which one they're after — that's what
+ * the prospect/inquiry is based on, together with their location. The
+ * server (/api/product-inquiry) figures out which RBPN partner to route the
+ * inquiry to (exact area match, or nearest by distance) — see
+ * src/lib/matchDealer.js.
  */
-export default function ProductInquiryForm({ product }) {
+export default function ProductInquiryForm({ product, items = [] }) {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     location: "",
+    productItem: "",
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
@@ -49,6 +53,7 @@ export default function ProductInquiryForm({ product }) {
           phone: form.phone,
           location: form.location,
           product,
+          productItem: items.length > 0 ? form.productItem : "",
           message: form.message,
         }),
       });
@@ -57,7 +62,15 @@ export default function ProductInquiryForm({ product }) {
 
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 4000);
-      setForm({ firstName: "", lastName: "", email: "", phone: "", location: "", message: "" });
+      setForm({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        location: "",
+        productItem: "",
+        message: "",
+      });
     } catch (err) {
       console.error(err);
       setError(true);
@@ -164,6 +177,23 @@ export default function ProductInquiryForm({ product }) {
                 </option>
               ))}
             </select>
+            {items.length > 0 && (
+              <select
+                name="productItem"
+                value={form.productItem}
+                onChange={handleChange}
+                required
+                suppressHydrationWarning
+                className="border border-gray-300 bg-gray-100 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 sm:col-span-2"
+              >
+                <option value="">Which product are you interested in?*</option>
+                {items.map((item, i) => (
+                  <option key={i} value={item.name}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            )}
             <textarea
               name="message"
               value={form.message}

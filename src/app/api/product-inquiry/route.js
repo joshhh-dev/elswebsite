@@ -9,9 +9,9 @@ import { matchDealer } from "@/lib/matchDealer";
 // distance), tags the inquiry with the product, and writes it to the same
 // Firestore "inquiries" collection the dealer portal already reads from.
 export async function POST(req) {
-  let name, email, phone, message, product, location;
+  let name, email, phone, message, product, productItem, location;
   try {
-    ({ name, email, phone, message, product, location } = await req.json());
+    ({ name, email, phone, message, product, productItem, location } = await req.json());
   } catch (parseError) {
     console.error("Invalid request body:", parseError);
     return new Response(JSON.stringify({ success: false }), { status: 400 });
@@ -35,13 +35,13 @@ export async function POST(req) {
     await adminDb.collection("inquiries").add({
       dealerSlug: match.dealer.slug,
       product,
+      ...(productItem ? { productItem } : {}),
       location,
       name,
       email,
       phone: phone || "",
       message: message || "",
-      contacted: false,
-      done: false,
+      status: "new",
       createdAt: FieldValue.serverTimestamp(),
     });
     return new Response(JSON.stringify({ success: true }), { status: 200 });

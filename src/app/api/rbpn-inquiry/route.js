@@ -22,8 +22,7 @@ export async function POST(req) {
       email: user_email,
       phone: phone || "",
       message,
-      contacted: false,
-      done: false,
+      status: "new",
       createdAt: FieldValue.serverTimestamp(),
     });
     return new Response(JSON.stringify({ success: true }), { status: 200 });

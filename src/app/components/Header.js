@@ -7,14 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 
-const PRODUCT_LINKS = [
-  { href: "/lg", label: "LG" },
-  { href: "/scarpavapor", label: "Scarpavapor" },
-  { href: "/prols", label: "ProLS" },
-  { href: "/lac", label: "LAC" },
-  { href: "/lms", label: "LMS" },
-];
-
 const NAV_LINKS = [
   { href: "/rbpn", label: "Find a Dealer" },
   { href: "/announcements", label: "Announcements" },
@@ -22,7 +14,7 @@ const NAV_LINKS = [
   { href: "/quick-links/contact", label: "Contact" },
 ];
 
-export default function Header() {
+export default function Header({ products = [] }) {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,7 +28,7 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isProductActive = PRODUCT_LINKS.some((link) => link.href === pathname);
+  const isProductActive = products.some((p) => `/${p.slug}` === pathname);
 
   const openProducts = () => {
     clearTimeout(closeTimer.current);
@@ -115,19 +107,19 @@ export default function Header() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute left-0 top-full mt-3 w-52 rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden"
+                  className="absolute left-0 top-full mt-3 w-52 rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden py-1"
                 >
-                  {PRODUCT_LINKS.map((link) => (
+                  {products.map((product) => (
                     <Link
-                      key={link.href}
-                      href={link.href}
+                      key={product.id}
+                      href={`/${product.slug}`}
                       className={`block px-4 py-3 text-sm font-medium transition-colors ${
-                        pathname === link.href
+                        pathname === `/${product.slug}`
                           ? "text-white bg-white/10"
                           : "text-gray-300 hover:text-white hover:bg-white/5"
                       }`}
                     >
-                      {link.label}
+                      {product.name}
                     </Link>
                   ))}
                 </motion.div>
@@ -219,16 +211,16 @@ export default function Header() {
                     exit={{ opacity: 0, height: 0 }}
                     className="flex flex-col overflow-hidden bg-white/5 rounded-lg my-2"
                   >
-                    {PRODUCT_LINKS.map((link) => (
+                    {products.map((product) => (
                       <Link
-                        key={link.href}
-                        href={link.href}
+                        key={product.id}
+                        href={`/${product.slug}`}
                         onClick={() => setMenuOpen(false)}
-                        className={`px-4 py-2.5 text-sm font-medium ${
-                          pathname === link.href ? "text-white" : "text-gray-300"
+                        className={`px-4 py-2.5 text-sm font-medium block ${
+                          pathname === `/${product.slug}` ? "text-white" : "text-gray-300"
                         }`}
                       >
-                        {link.label}
+                        {product.name}
                       </Link>
                     ))}
                   </motion.div>

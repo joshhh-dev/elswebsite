@@ -1,0 +1,101 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // admins/{uid}.role splits dashboard access: missing field (or "admin")
+    // is a full admin (sees everything, same as before this field existed);
+    // "inquiries" or "publisher" are restricted to just that area.
+    function adminData() {
+      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data;
+    }
+    function hasAdminRole(role) {
+      return isAdmin() &&
+        (!('role' in adminData()) || adminData().role == "admin" || adminData().role == "developer" || adminData().role == role);
+    }
+    // Developer: a superset of "admin" that can also manage other staff
+    // accounts (see admins/{adminId} below) — not granted by hasAdminRole()
+    // since a plain "admin"/"inquiries"/"publisher" should NOT get staff
+    // management just because they're full admins.
+    function isDeveloper() {
+      return isAdmin() && adminData().role == "developer";
+    }
+
+    // Default deny — nothing is readable/writable unless explicitly allowed below.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Admin accounts — existence of admins/{uid} is what makes a user an
+    // admin (created manually via Admin SDK, same as dealers).
+    match /admins/{adminId} {
+      allow read: if request.auth != null && (request.auth.uid == adminId || isDeveloper());
+      // Every mutation (create/role-change/delete) goes through the
+      // server-verified /api/staff routes (Admin SDK, bypasses rules) —
+      // never a direct client write, even for a developer.
+      allow write: if false;
+    }
+
+    // A dealer can read their own profile; an admin can read any dealer's
+    // profile (created manually by an admin for now — maps a Firebase Auth
+    // uid to a dealer slug/company/area).
+    match /dealers/{dealerId} {
+      allow read: if request.auth != null &&
+        (request.auth.uid == dealerId || isAdmin());
+      allow write: if false; // admin-managed only (Admin SDK bypasses rules)
+    }
+
+    // A dealer can read an inquiry only if its dealerSlug matches their own
+    // dealer profile's slug; an admin can read ALL inquiries (monitoring
+    // every partner's incoming leads). New inquiries are created
+    // server-side only (elswebsite's API, via Admin SDK, which bypasses
+    // these rules). From the dashboard: a dealer can only move an inquiry's
+    // "status" through the pipeline (new/contacted/quoted/won/lost); an
+    // admin can do that too, AND reassign which RBPN partner (dealerSlug)
+    // the prospect belongs to — a dealer can never reassign their own leads
+    // away.
+    match /inquiries/{inquiryId} {
+      allow read: if request.auth != null &&
+        (hasAdminRole("inquiries") ||
+         get(/databases/$(database)/documents/dealers/$(request.auth.uid)).data.slug == resource.data.dealerSlug);
+
+      allow update: if request.auth != null && (
+        (
+          hasAdminRole("inquiries") &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["status", "updatedAt", "dealerSlug", "reassignedFrom", "reassignedAt"]) &&
+          request.resource.data.status in ["new", "contacted", "quoted", "won", "lost"]
+        ) ||
+        (
+          !hasAdminRole("inquiries") &&
+          get(/databases/$(database)/documents/dealers/$(request.auth.uid)).data.slug == resource.data.dealerSlug &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "updatedAt"]) &&
+          request.resource.data.status in ["new", "contacted", "quoted", "won", "lost"]
+        )
+      );
+
+      allow create, delete: if false;
+    }
+
+    // Posts/announcements the admin publishes for elswebsite to display.
+    // Public (unauthenticated) visitors — and elswebsite's own server, via
+    // Admin SDK — can read published posts only; admins can read/write
+    // everything (including drafts) directly from the portal.
+    match /posts/{postId} {
+      allow read: if resource.data.status == "published" || hasAdminRole("publisher");
+      allow create, update, delete: if hasAdminRole("publisher");
+    }
+
+    // Product pages (LG, LAC, LMS, ProLS, Scarpavapor, and any new ones the
+    // admin adds) — same public-read-when-published / admin-write pattern
+    // as posts.
+    match /products/{productId} {
+      allow read: if resource.data.status == "published" || hasAdminRole("publisher");
+      allow create, update, delete: if hasAdminRole("publisher");
+    }
+  }
+}
