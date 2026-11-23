@@ -20,6 +20,15 @@ export const DashboardContext = createContext({
   canManageInquiries: true,
   canPublish: true,
   canManageStaff: false,
+  // Only meaningful when isAdmin is false — derived once here from
+  // `dealer` (see src/lib/dealerRoles.js) so every page checks the same
+  // thing instead of re-deriving this predicate itself.
+  isDealerOwner: false,
+  isDealerStaff: false,
+  // slug -> company name for every dealers doc, admin-only (fetched once
+  // in dashboard/layout.js and shared here instead of each admin page
+  // independently re-fetching the same collection).
+  dealersBySlug: {},
 });
 
 export function useDashboard() {

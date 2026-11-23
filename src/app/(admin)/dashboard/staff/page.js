@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { useDashboard } from "@/lib/DashboardContext";
+import { logIfUnexpected } from "@/lib/logIfUnexpected";
+import { callDashboardApi as callStaffApi } from "@/lib/callDashboardApi";
 
 const ROLE_OPTIONS = [
   { value: "admin", label: "Admin (Inquiries + Publishing)" },
@@ -14,23 +16,6 @@ const ROLE_OPTIONS = [
 ];
 
 const roleLabel = (role) => ROLE_OPTIONS.find((r) => r.value === (role || "admin"))?.label || role;
-
-async function callStaffApi(path, body, method = "POST") {
-  const idToken = await auth.currentUser.getIdToken();
-  const res = await fetch(path, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${idToken}`,
-    },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.error || "Something went wrong.");
-  }
-  return data;
-}
 
 function AddStaffForm({ onAdded }) {
   const [email, setEmail] = useState("");
@@ -189,10 +174,17 @@ export default function StaffPage() {
   useEffect(() => {
     if (!roleChecked || !canManageStaff) return;
     const q = query(collection(db, "admins"), orderBy("email"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setAccounts(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setAccounts(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        logIfUnexpected(err);
+        setLoading(false);
+      }
+    );
     return () => unsubscribe();
   }, [roleChecked, canManageStaff]);
 

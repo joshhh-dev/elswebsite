@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { FaPaperPlane } from "react-icons/fa";
 import DealerAvatar from "@/app/components/DealerAvatar";
@@ -31,9 +32,9 @@ export default function RbpnDealerPage({ slug }) {
       <main className="min-h-screen flex items-center justify-center px-6 text-center">
         <p className="text-gray-600">
           Dealer information not found. Please check back later or visit our{" "}
-          <a href="/rbpn" className="text-blue-600 underline">
+          <Link href="/rbpn" className="text-blue-600 underline">
             Find a Dealer
-          </a>{" "}
+          </Link>{" "}
           page.
         </p>
       </main>

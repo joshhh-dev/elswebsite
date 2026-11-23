@@ -2,27 +2,67 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() {
+    // Admin checks still look up the caller's own admins/{uid} doc (cheap —
+    // this condition never depends on resource.data, so it doesn't hit the
+    // list-query limitation described below). Every function here does AT
+    // MOST one exists() + one get(), bound once and reused, never re-fetched
+    // per branch.
+    function callerIsAdmin() {
       return request.auth != null &&
         exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function callerAdmin() {
+      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data;
     }
 
     // admins/{uid}.role splits dashboard access: missing field (or "admin")
     // is a full admin (sees everything, same as before this field existed);
-    // "inquiries" or "publisher" are restricted to just that area.
-    function adminData() {
-      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data;
-    }
-    function hasAdminRole(role) {
-      return isAdmin() &&
-        (!('role' in adminData()) || adminData().role == "admin" || adminData().role == "developer" || adminData().role == role);
+    // "inquiries" or "publisher" are restricted to just that area. Takes
+    // the already-fetched admin doc — never fetches it itself.
+    function adminRoleAllows(admin, role) {
+      return !('role' in admin) || admin.role == "admin" || admin.role == "developer" || admin.role == role;
     }
     // Developer: a superset of "admin" that can also manage other staff
-    // accounts (see admins/{adminId} below) — not granted by hasAdminRole()
-    // since a plain "admin"/"inquiries"/"publisher" should NOT get staff
-    // management just because they're full admins.
-    function isDeveloper() {
-      return isAdmin() && adminData().role == "developer";
+    // accounts (see admins/{adminId} below) — not granted by
+    // adminRoleAllows() since a plain "admin"/"inquiries"/"publisher"
+    // should NOT get staff management just because they're full admins.
+    function isDeveloperAdmin(admin) {
+      return admin.role == "developer";
+    }
+
+    // Dealer role/slug come from AUTH CUSTOM CLAIMS, not a Firestore get()
+    // on dealers/{uid} — set at account creation (see /api/dealer-staff)
+    // and backfilled for existing accounts. This is required, not just an
+    // optimization: Firestore evaluates a list/query's security rule
+    // against the query's *potential* result set using only its own
+    // where() filters, not the actual document values at runtime. A
+    // condition that needs an external get() to compare a field on the
+    // CALLER's own profile against a field on each returned document
+    // (e.g. "my dealer doc's slug == this inquiry's dealerSlug") can never
+    // be proven true for every possible match that way, so Firestore
+    // denies the WHOLE query — even though every actual result would
+    // individually pass a getDoc() with the identical check. This silently
+    // wiped out a dealer's entire inquiry list on every reload once there
+    // was more than a couple of matching documents. request.auth.token.X
+    // has no such limitation (it's part of the request itself, not a
+    // separate document lookup), so putting dealerRole/dealerSlug there
+    // lets these checks match the query's own filters exactly.
+    function dealerRole() {
+      return request.auth.token.dealerRole;
+    }
+    function dealerSlug() {
+      return request.auth.token.dealerSlug;
+    }
+    // dealerRole is "owner" (full visibility of every inquiry on their
+    // slug, plus managing staff sub-accounts and assigning/reassigning
+    // prospects between them) or "staff" (a sub-account created by the
+    // owner — see /api/dealer-staff — that only sees inquiries explicitly
+    // assigned to it and can never reassign).
+    function isOwnerToken() {
+      return dealerRole() == "owner";
+    }
+    function isStaffToken() {
+      return dealerRole() == "staff";
     }
 
     // Default deny — nothing is readable/writable unless explicitly allowed below.
@@ -33,7 +73,8 @@ service cloud.firestore {
     // Admin accounts — existence of admins/{uid} is what makes a user an
     // admin (created manually via Admin SDK, same as dealers).
     match /admins/{adminId} {
-      allow read: if request.auth != null && (request.auth.uid == adminId || isDeveloper());
+      allow read: if request.auth != null &&
+        (request.auth.uid == adminId || (callerIsAdmin() && isDeveloperAdmin(callerAdmin())));
       // Every mutation (create/role-change/delete) goes through the
       // server-verified /api/staff routes (Admin SDK, bypasses rules) —
       // never a direct client write, even for a developer.
@@ -42,40 +83,93 @@ service cloud.firestore {
 
     // A dealer can read their own profile; an admin can read any dealer's
     // profile (created manually by an admin for now — maps a Firebase Auth
-    // uid to a dealer slug/company/area).
+    // uid to a dealer slug/company/area). An owner can also list every
+    // profile sharing their slug (their own staff roster, created via
+    // /api/dealer-staff) — staff accounts can't list each other.
     match /dealers/{dealerId} {
       allow read: if request.auth != null &&
-        (request.auth.uid == dealerId || isAdmin());
-      allow write: if false; // admin-managed only (Admin SDK bypasses rules)
+        (request.auth.uid == dealerId || callerIsAdmin() ||
+         (isOwnerToken() && resource.data.slug == dealerSlug()));
+      allow write: if false; // admin/owner-managed only (Admin SDK bypasses rules)
     }
 
-    // A dealer can read an inquiry only if its dealerSlug matches their own
-    // dealer profile's slug; an admin can read ALL inquiries (monitoring
-    // every partner's incoming leads). New inquiries are created
+    // A dealer owner can read an inquiry if its dealerSlug matches their own
+    // slug; a dealer staff sub-account only if it's ALSO the one assigned
+    // (assignedStaff == their uid); an admin can read ALL inquiries
+    // (monitoring every partner's incoming leads). New inquiries are created
     // server-side only (elswebsite's API, via Admin SDK, which bypasses
-    // these rules). From the dashboard: a dealer can only move an inquiry's
-    // "status" through the pipeline (new/contacted/quoted/won/lost); an
-    // admin can do that too, AND reassign which RBPN partner (dealerSlug)
-    // the prospect belongs to — a dealer can never reassign their own leads
-    // away.
+    // these rules). From the dashboard: ELS admin only routes a prospect to
+    // the right RBPN partner (dealerSlug) — the partner (owner) and their
+    // staff are the ones actually working the lead, so only they can move
+    // its "status" through the pipeline; an owner can also assign/reassign
+    // the inquiry between their own staff. Nobody but an admin can move a
+    // prospect to a different partner.
+    function dealerCanAccessInquiry(data) {
+      return (isOwnerToken() && dealerSlug() == data.dealerSlug) ||
+        (isStaffToken() && data.assignedStaff == request.auth.uid);
+    }
+    // A staff uid an owner writes into assignedStaff must actually belong
+    // to THEIR OWN roster (a real dealers/{uid} doc, role "staff", same
+    // slug) — a single-document write (not a list query), so a get() here
+    // doesn't hit the list-query limitation above. "" (the UI's own
+    // "Unassigned" option) is always valid and skips the lookup.
+    function isValidStaffAssignment(staffUid) {
+      let staff = get(/databases/$(database)/documents/dealers/$(staffUid)).data;
+      return staff.role == "staff" && staff.slug == dealerSlug();
+    }
+
+    // Whenever firstContactedAt is touched at all, its value must be "now"
+    // per the server's own clock — the dashboard only ever writes it via
+    // serverTimestamp() (see dashboard/page.js's handleStatusChange), which
+    // resolves to exactly this on the server. Without this, a dealer using
+    // the client SDK directly could backdate/forward-date it to anything,
+    // silently corrupting the admin Overview's "Avg. time to contact" stat.
+    function firstContactedAtValid(affected, newData) {
+      return !('firstContactedAt' in affected) || newData.firstContactedAt == request.time;
+    }
+
+    function dealerCanUpdateInquiry(data, newData) {
+      let affected = newData.diff(data).affectedKeys();
+      return (
+        isOwnerToken() && dealerSlug() == data.dealerSlug &&
+        affected.hasOnly(["status", "updatedAt", "assignedStaff", "assignedStaffAt", "firstContactedAt"]) &&
+        newData.status in ["new", "contacted", "quoted", "won", "lost"] &&
+        firstContactedAtValid(affected, newData) &&
+        // Only re-validate the staff uid when THIS write actually changes
+        // it — not on every unrelated status-only update to a document
+        // that happens to already have an assignedStaff value, which
+        // would otherwise pay (and could be blocked by) a get() lookup
+        // that has nothing to do with the change being made.
+        (!('assignedStaff' in affected) || newData.assignedStaff == "" || isValidStaffAssignment(newData.assignedStaff))
+      ) || (
+        isStaffToken() && data.assignedStaff == request.auth.uid &&
+        affected.hasOnly(["status", "updatedAt", "firstContactedAt"]) &&
+        newData.status in ["new", "contacted", "quoted", "won", "lost"] &&
+        firstContactedAtValid(affected, newData)
+      );
+    }
+
+    // Admin's allowed keys include assignedStaff/assignedStaffAt only so a
+    // reassign-to-a-different-partner can CLEAR them (see dealerSlug check
+    // below) — admin must never be able to SET either to a concrete value,
+    // which would hand a lead to an arbitrary staff uid (any partner's)
+    // with none of the same-partner validation the owner branch enforces.
+    function adminCanUpdateInquiry(data, newData) {
+      let affected = newData.diff(data).affectedKeys();
+      return adminRoleAllows(callerAdmin(), "inquiries") &&
+        affected.hasOnly(["updatedAt", "dealerSlug", "reassignedFrom", "reassignedAt", "assignedStaff", "assignedStaffAt"]) &&
+        (!('assignedStaff' in affected) || !('assignedStaff' in newData)) &&
+        (!('assignedStaffAt' in affected) || !('assignedStaffAt' in newData));
+    }
+
     match /inquiries/{inquiryId} {
       allow read: if request.auth != null &&
-        (hasAdminRole("inquiries") ||
-         get(/databases/$(database)/documents/dealers/$(request.auth.uid)).data.slug == resource.data.dealerSlug);
+        ((callerIsAdmin() && adminRoleAllows(callerAdmin(), "inquiries")) ||
+         dealerCanAccessInquiry(resource.data));
 
       allow update: if request.auth != null && (
-        (
-          hasAdminRole("inquiries") &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(["status", "updatedAt", "dealerSlug", "reassignedFrom", "reassignedAt"]) &&
-          request.resource.data.status in ["new", "contacted", "quoted", "won", "lost"]
-        ) ||
-        (
-          !hasAdminRole("inquiries") &&
-          get(/databases/$(database)/documents/dealers/$(request.auth.uid)).data.slug == resource.data.dealerSlug &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "updatedAt"]) &&
-          request.resource.data.status in ["new", "contacted", "quoted", "won", "lost"]
-        )
+        (callerIsAdmin() && adminCanUpdateInquiry(resource.data, request.resource.data)) ||
+        dealerCanUpdateInquiry(resource.data, request.resource.data)
       );
 
       allow create, delete: if false;
@@ -86,16 +180,28 @@ service cloud.firestore {
     // Admin SDK — can read published posts only; admins can read/write
     // everything (including drafts) directly from the portal.
     match /posts/{postId} {
-      allow read: if resource.data.status == "published" || hasAdminRole("publisher");
-      allow create, update, delete: if hasAdminRole("publisher");
+      allow read: if resource.data.status == "published" ||
+        (callerIsAdmin() && adminRoleAllows(callerAdmin(), "publisher"));
+      allow create, update, delete: if callerIsAdmin() && adminRoleAllows(callerAdmin(), "publisher");
     }
 
     // Product pages (LG, LAC, LMS, ProLS, Scarpavapor, and any new ones the
     // admin adds) — same public-read-when-published / admin-write pattern
     // as posts.
     match /products/{productId} {
-      allow read: if resource.data.status == "published" || hasAdminRole("publisher");
-      allow create, update, delete: if hasAdminRole("publisher");
+      allow read: if resource.data.status == "published" ||
+        (callerIsAdmin() && adminRoleAllows(callerAdmin(), "publisher"));
+      allow create, update, delete: if callerIsAdmin() && adminRoleAllows(callerAdmin(), "publisher");
+    }
+
+    // metadata/inquiryFilters — a small denormalized doc (location/product
+    // values ever seen, updated via FieldValue.arrayUnion in
+    // /api/product-inquiry) so the admin Inquiries page's filter dropdowns
+    // stay complete regardless of the windowed inquiries query. Admin-only,
+    // server-written (Admin SDK bypasses rules).
+    match /metadata/{docId} {
+      allow read: if callerIsAdmin() && adminRoleAllows(callerAdmin(), "inquiries");
+      allow write: if false;
     }
   }
 }

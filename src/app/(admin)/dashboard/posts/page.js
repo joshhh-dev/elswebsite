@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useDashboard } from "@/lib/DashboardContext";
+import { logIfUnexpected } from "@/lib/logIfUnexpected";
 import { compressImageToDataUrl, MAX_DATA_URL_BYTES } from "@/lib/imageCompress";
 
 const EMPTY_POST = { title: "", blocks: [], status: "draft" };
@@ -212,10 +213,17 @@ export default function PostsPage() {
   useEffect(() => {
     if (!roleChecked || !canPublish) return;
     const q = query(collection(db, "posts"), orderBy("updatedAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setPosts(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setPosts(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        logIfUnexpected(err);
+        setLoading(false);
+      }
+    );
     return () => unsubscribe();
   }, [roleChecked, canPublish]);
 

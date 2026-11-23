@@ -1,7 +1,7 @@
 // Client-side Firebase init for the RBPN Dealer Portal.
 //
-// Dedicated Firebase project for this portal ("elsphilippines") — separate
-// from any other Firebase project the business uses.
+// Dedicated Firebase project for this portal ("els-philippines-inc", Blaze
+// plan) — separate from any other Firebase project the business uses.
 //
 // Real values live in .env.local (copy .env.local.example if it's missing).
 //
@@ -17,7 +17,7 @@ import { getStorage } from "firebase/storage";
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "elsphilippines",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "els-philippines-inc",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,

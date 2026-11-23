@@ -426,6 +426,14 @@ header {
   padding: 32px 24px;
 }
 
+/* The Overview page's bento grid is data-dense (a right-hand sidebar plus
+   several cards side by side) and reads cramped at the plain .dashboard
+   width meant for a single-column list — widen just this page instead of
+   every page using .dashboard. */
+.dashboard.dashboard-wide {
+  max-width: 1440px;
+}
+
 @media (max-width: 480px) {
   .dashboard {
     padding: 20px 16px;
@@ -636,6 +644,23 @@ header {
   color: #6d28d9;
 }
 
+/* What kind of request this is (Purchase Order, Design Request, etc.) —
+   distinct from .product-tag/.product-item-tag, which are about the
+   product, not the request type. "General Inquiry" (the default) is never
+   tagged — only shown when it's something more specific. */
+.inquiry-type-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #cffafe;
+  color: #0e7490;
+}
+
 .inquiry-summary-side {
   display: flex;
   flex-direction: column;
@@ -679,10 +704,12 @@ header {
   color: #166534;
 }
 
-/* Inquiry pipeline stages */
+/* Inquiry pipeline stages — text colors match STAGE_COLORS in
+   InquiryCard.js (same hex as the stat-card border, the pipeline-split
+   rings, and the status filter buttons below). */
 .status-badge.status-stage-new {
   background: #f3f4f6;
-  color: var(--text-muted);
+  color: #6b7280;
 }
 
 .status-badge.status-stage-contacted {
@@ -692,17 +719,37 @@ header {
 
 .status-badge.status-stage-quoted {
   background: #fef3c7;
-  color: #92400e;
+  color: #b45309;
 }
 
 .status-badge.status-stage-won {
   background: #dcfce7;
-  color: #166534;
+  color: #0ca30c;
 }
 
 .status-badge.status-stage-lost {
   background: #fee2e2;
-  color: #991b1b;
+  color: #d03b3b;
+}
+
+/* Shown when a query is windowed (limit()) and the window is maxed out —
+   so a filter silently missing older, not-yet-loaded matches is surfaced
+   rather than hidden. */
+.window-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.window-note-link {
+  font: inherit;
+  color: var(--brand-blue);
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 /* Inquiries list — status filter bar */
@@ -734,8 +781,11 @@ header {
 .status-filter-btn.status-stage-new.active { background: #6b7280; }
 .status-filter-btn.status-stage-contacted.active { background: #1d4ed8; }
 .status-filter-btn.status-stage-quoted.active { background: #b45309; }
-.status-filter-btn.status-stage-won.active { background: #166534; }
-.status-filter-btn.status-stage-lost.active { background: #991b1b; }
+/* Won's canonical green is too light for white text at this size — dark
+   text keeps it readable (same exception the dataviz skill makes for its
+   lightest status/categorical fills), the fill color itself is unchanged. */
+.status-filter-btn.status-stage-won.active { background: #0ca30c; color: #111827; }
+.status-filter-btn.status-stage-lost.active { background: #d03b3b; }
 
 .location-filter-select {
   font-size: 0.8rem;
@@ -748,7 +798,313 @@ header {
   cursor: pointer;
 }
 
-/* Admin Overview — stat cards */
+
+/* Admin Overview — date-range + partner filter, scoping every number on the
+   page so it's never ambiguous whether e.g. "5 won" means this month or all
+   time. */
+.overview-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* Admin Overview — a 12-column bento grid. Needs attention is a right-hand
+   sidebar spanning every row (named area repeated down the rows) so its
+   full list sits in one tall scrollable panel, visible at a glance, instead
+   of a small tile squeezed into the top row. Collapses to a single stacked
+   column on narrower screens (same breakpoint the rest of the dashboard
+   layout collapses at). */
+.overview-bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-areas:
+    "hero1 hero1 hero1 hero1 hero2 hero2 hero2 hero2 attn attn attn attn"
+    "rings rings rings rings rings rings rings rings attn attn attn attn"
+    "volume volume volume volume volume volume volume volume attn attn attn attn"
+    "stage stage stage partners partners partners partners partners attn attn attn attn";
+  gap: 14px;
+  align-items: stretch;
+}
+
+.bento-hero-1 {
+  grid-area: hero1;
+}
+
+.bento-hero-2 {
+  grid-area: hero2;
+}
+
+.bento-rings {
+  grid-area: rings;
+}
+
+.bento-volume {
+  grid-area: volume;
+}
+
+.bento-stage {
+  grid-area: stage;
+}
+
+.bento-partners {
+  grid-area: partners;
+}
+
+.bento-attention {
+  grid-area: attn;
+}
+
+@media (max-width: 900px) {
+  .overview-bento {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "hero1"
+      "hero2"
+      "attn"
+      "rings"
+      "volume"
+      "stage"
+      "partners";
+  }
+}
+
+/* Groups a block of the page (pipeline split, stage tiles, top partners)
+   into its own card so the page reads as distinct sections rather than one
+   long scroll of same-weight blocks. */
+.overview-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.overview-bento .overview-section {
+  margin-bottom: 0;
+}
+
+.overview-section > h3 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.overview-section .stat-grid,
+.overview-section .stage-ring-row {
+  margin-bottom: 0;
+}
+
+/* "Needs attention" overdue-inquiry banner — surfaced above every other
+   section since it's the one actionable item on this page; warning-toned
+   (not just another post-list-item) so it reads as an alert. */
+.attention-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.overview-bento .attention-banner {
+  margin-bottom: 0;
+}
+
+/* The bento-grid sidebar version shows every loaded item in full (no
+   internal scrollbar) — it just grows with the list. Beyond what's loaded,
+   the existing "See more" button (paginated, see dashboard/page.js) reveals
+   more instead of a scroll area hiding them. */
+.attention-banner-compact {
+  display: flex;
+  flex-direction: column;
+}
+
+.attention-banner-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.attention-banner-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #92400e;
+}
+
+.attention-banner-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Always shown, even with nothing overdue — a neutral "all clear" card
+   instead of the warning tone, which would read as a contradiction when
+   paired with "no data". */
+.attention-banner.attention-banner-empty {
+  background: var(--card-bg);
+  border-color: var(--border);
+}
+
+.attention-banner-empty .attention-banner-header h3 {
+  color: var(--text);
+}
+
+.attention-banner-empty .attention-banner-icon {
+  color: #16a34a;
+}
+
+.attention-banner-empty-text {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.attention-banner-count {
+  margin-left: auto;
+  background: #d97706;
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.attention-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #fde68a;
+}
+
+.attention-item:first-child {
+  border-top: none;
+}
+
+/* Top partners — ranked list with a magnitude bar (relative to the largest
+   total among the partners shown) so volume reads at a glance, not just as
+   numbers. */
+.partner-rank-item {
+  padding: 12px 14px;
+  margin: 0 -14px;
+  border-radius: 14px;
+  border-top: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+
+.partner-rank-item:first-child {
+  border-top: none;
+}
+
+.partner-rank-item:hover {
+  background: var(--bg);
+}
+
+.partner-rank-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.partner-rank-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.partner-rank-bar-fill {
+  height: 100%;
+  background: var(--brand-blue);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* Inquiry-volume-over-time chart — hand-rolled inline SVG line/area chart
+   (no chart library in this project), single series so one hue
+   (var(--brand-blue), already the Top-partners bar color) is enough; a
+   mousemove-nearest-bucket crosshair + tooltip stand in for a hover layer. */
+.volume-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.volume-chart-header h3 {
+  margin: 0;
+}
+
+.volume-chart {
+  position: relative;
+}
+
+.volume-chart-svg {
+  display: block;
+  width: 100%;
+  height: 180px;
+}
+
+.volume-chart-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.volume-chart-crosshair {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.volume-chart-labels {
+  position: relative;
+  height: 18px;
+  margin-top: 4px;
+}
+
+.volume-chart-label {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.volume-chart-tooltip {
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+/* Admin Overview — the two headline-number hero tiles in the bento grid,
+   bigger than the compact stage tiles. */
+.stat-card-hero {
+  padding: 24px 22px;
+}
+
+.stat-card-hero .stat-number {
+  font-size: 2.6rem;
+}
+
+.stat-card-hero .stat-label {
+  font-size: 0.95rem;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -756,15 +1112,52 @@ header {
   margin-bottom: 8px;
 }
 
+.stat-grid-compact {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.stat-card-compact {
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.stat-card-compact .stat-number {
+  font-size: 1.3rem;
+}
+
+.stat-card-compact .stat-label {
+  font-size: 0.75rem;
+}
+
 .stat-card {
+  --stat-color: var(--brand-blue);
+  position: relative;
+  isolation: isolate;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-top: 3px solid var(--text-muted);
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.18);
+  border-color: color-mix(in srgb, var(--stat-color) 35%, var(--border));
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 20% 15%, var(--stat-color) 0%, transparent 65%);
+  opacity: 0.08;
+  z-index: -1;
 }
 
 .stat-number {
@@ -774,28 +1167,113 @@ header {
 }
 
 .stat-label {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
 }
 
+/* Stage colors below match STAGE_COLORS in InquiryCard.js (the single
+   source of truth) — same hex per stage as the pipeline-split rings and the
+   status filter buttons, so a stage reads as the same color everywhere. */
 .stat-card-new {
-  border-top-color: var(--text-muted);
+  border-top-color: #6b7280;
+  --stat-color: #6b7280;
 }
 
 .stat-card-contacted {
   border-top-color: #1d4ed8;
+  --stat-color: #1d4ed8;
 }
 
 .stat-card-quoted {
-  border-top-color: #92400e;
+  border-top-color: #b45309;
+  --stat-color: #b45309;
 }
 
 .stat-card-won {
-  border-top-color: #166534;
+  border-top-color: #0ca30c;
+  --stat-color: #0ca30c;
 }
 
 .stat-card-lost {
-  border-top-color: #991b1b;
+  border-top-color: #d03b3b;
+  --stat-color: #d03b3b;
+}
+
+/* Pipeline split — one ring per stage (not one combined chart), each a
+   donut-style progress ring showing that stage's share of the total.
+   Colors are deliberately not identical to the status badge and stat-card
+   colors used elsewhere in the dashboard: validated for colorblind-safe
+   adjacency (see the dataviz skill) rather than reusing the exact badge
+   hexes, which fail that check for green vs red. Won and Lost get an extra
+   checkmark/cross glyph under the ring (not color alone) since that pair is
+   the one unavoidable red/green adjacency. */
+.stage-ring-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.stage-ring {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 14px 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  isolation: isolate;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.stage-ring:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.18);
+  border-color: color-mix(in srgb, var(--ring-color) 35%, var(--border));
+}
+
+.stage-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 38%, var(--ring-color) 0%, transparent 65%);
+  opacity: 0.08;
+  z-index: -1;
+}
+
+.stage-ring-svg {
+  width: 120px;
+  height: 120px;
+  filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--ring-color) 45%, transparent));
+}
+
+.stage-ring-svg circle {
+  cursor: default;
+}
+
+.stage-ring-track {
+  stroke: var(--border);
+}
+
+.stage-ring-svg circle[stroke]:not(.stage-ring-track) {
+  transition: stroke-dasharray 0.6s ease;
+}
+
+.stage-ring-value {
+  fill: var(--text);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.stage-ring-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
 }
 
 .inquiry-date {
@@ -905,6 +1383,63 @@ header {
   padding: 16px 20px;
   margin-bottom: 12px;
   cursor: pointer;
+}
+
+.see-more-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--brand-blue);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.see-more-btn:hover {
+  background: color-mix(in srgb, var(--brand-blue) 8%, var(--card-bg));
+}
+
+/* Admin Inquiries — search + CSV export toolbar, above the status filter
+   bar. .export-csv-btn overrides .see-more-btn's block/full-width layout
+   for a compact inline button instead — must stay after .see-more-btn in
+   this file so the cascade (equal specificity) resolves in its favor. */
+.inquiries-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.search-input {
+  flex: 1 1 260px;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--brand-blue);
+}
+
+.export-csv-btn {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: auto;
+  margin-top: 0;
+}
+
+.export-csv-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .back-link {

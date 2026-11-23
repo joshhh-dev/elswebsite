@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection } from "firebase/firestore";
 import { auth, db, isFirebaseConfigured } from "@/lib/firebase";
 import { DashboardContext } from "@/lib/DashboardContext";
+import { logIfUnexpected } from "@/lib/logIfUnexpected";
+import { isOwnerDealerDoc, isStaffDealerDoc } from "@/lib/dealerRoles";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function DashboardLayout({ children }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminRole, setAdminRole] = useState("admin");
   const [roleChecked, setRoleChecked] = useState(false);
+  const [dealersBySlug, setDealersBySlug] = useState({}); // slug -> company name, admin-only
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
@@ -37,6 +40,16 @@ export default function DashboardLayout({ children }) {
       } else {
         const dealerSnap = await getDoc(doc(db, "dealers", firebaseUser.uid));
         setDealer(dealerSnap.exists() ? dealerSnap.data() : null);
+        // Dealer role/slug live in this token's custom claims (see
+        // firestore.rules), not this Firestore doc — refresh so a tab
+        // left open across a claims backfill/update picks up the new
+        // values without requiring a full logout/login. Admins don't use
+        // these claims at all (their role comes from the admins doc
+        // above), so this only runs for the dealer path. Awaited: this
+        // page's own dealer queries fire right after roleChecked flips to
+        // true below, so a fire-and-forget refresh could leave the very
+        // first query using a stale token right after a claims backfill.
+        await firebaseUser.getIdToken(true).catch(() => {});
       }
       setRoleChecked(true);
     });
@@ -46,6 +59,54 @@ export default function DashboardLayout({ children }) {
   const canManageInquiries = adminRole === "admin" || adminRole === "developer" || adminRole === "inquiries";
   const canPublish = adminRole === "admin" || adminRole === "developer" || adminRole === "publisher";
   const canManageStaff = adminRole === "developer";
+  const isDealerOwner = !isAdmin && isOwnerDealerDoc(dealer);
+  const isDealerStaff = !isAdmin && isStaffDealerDoc(dealer);
+
+  // Shared by every admin page that needs a slug -> company name lookup
+  // (Overview, Inquiries) — fetched once here instead of each page
+  // independently re-fetching the same collection.
+  useEffect(() => {
+    if (!roleChecked || !isAdmin || !canManageInquiries) return;
+    getDocs(collection(db, "dealers"))
+      .then((snap) => {
+        const map = {};
+        snap.forEach((d) => {
+          const data = d.data();
+          if (data.slug) map[data.slug] = data.company;
+        });
+        setDealersBySlug(map);
+      })
+      .catch(logIfUnexpected);
+  }, [roleChecked, isAdmin, canManageInquiries]);
+
+  const contextValue = useMemo(
+    () => ({
+      user,
+      isAdmin,
+      dealer,
+      roleChecked,
+      role: adminRole,
+      canManageInquiries,
+      canPublish,
+      canManageStaff,
+      isDealerOwner,
+      isDealerStaff,
+      dealersBySlug,
+    }),
+    [
+      user,
+      isAdmin,
+      dealer,
+      roleChecked,
+      adminRole,
+      canManageInquiries,
+      canPublish,
+      canManageStaff,
+      isDealerOwner,
+      isDealerStaff,
+      dealersBySlug,
+    ]
+  );
 
   if (!isFirebaseConfigured) {
     return (
@@ -76,9 +137,7 @@ export default function DashboardLayout({ children }) {
       : "Admin (All Partners)";
 
   return (
-    <DashboardContext.Provider
-      value={{ user, isAdmin, dealer, roleChecked, role: adminRole, canManageInquiries, canPublish, canManageStaff }}
-    >
+    <DashboardContext.Provider value={contextValue}>
       <div className="dashboard-shell">
         <div className="topbar">
           <span className="brand">
@@ -120,13 +179,35 @@ export default function DashboardLayout({ children }) {
                 </>
               )}
               {canManageStaff && (
-                <Link
-                  href="/dashboard/staff"
-                  className={pathname?.startsWith("/dashboard/staff") ? "active" : ""}
-                >
-                  Staff
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard/staff"
+                    className={pathname?.startsWith("/dashboard/staff") ? "active" : ""}
+                  >
+                    Staff
+                  </Link>
+                  <Link
+                    href="/dashboard/dealers"
+                    className={pathname?.startsWith("/dashboard/dealers") ? "active" : ""}
+                  >
+                    Accounts
+                  </Link>
+                </>
               )}
+            </nav>
+          )}
+
+          {isDealerOwner && (
+            <nav className="dashboard-sidebar">
+              <Link href="/dashboard" className={pathname === "/dashboard" ? "active" : ""}>
+                Inquiries
+              </Link>
+              <Link
+                href="/dashboard/my-staff"
+                className={pathname?.startsWith("/dashboard/my-staff") ? "active" : ""}
+              >
+                My Staff
+              </Link>
             </nav>
           )}
 

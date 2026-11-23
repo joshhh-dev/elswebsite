@@ -2,8 +2,19 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaPaperPlane, FaMapMarkedAlt, FaClock, FaShieldAlt } from "react-icons/fa";
+import { FaPaperPlane, FaMapMarkedAlt, FaClock, FaShieldAlt, FaPaperclip } from "react-icons/fa";
 import { phLocations } from "@/lib/phLocations";
+import { INQUIRY_TYPES } from "@/app/components/InquiryCard";
+
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+const ALLOWED_ATTACHMENT_TYPES = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
 
 const FEATURES = [
   { icon: FaMapMarkedAlt, label: "Matched to the nearest RBPN partner" },
@@ -29,14 +40,40 @@ export default function ProductInquiryForm({ product, items = [] }) {
     phone: "",
     location: "",
     productItem: "",
+    inquiryType: "general",
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(false);
+  const [attachment, setAttachment] = useState(null);
+  const [attachmentError, setAttachmentError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAttachmentChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    if (!file) {
+      setAttachment(null);
+      setAttachmentError("");
+      return;
+    }
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      setAttachment(null);
+      setAttachmentError("File is too large (max 10MB).");
+      e.target.value = "";
+      return;
+    }
+    if (!ALLOWED_ATTACHMENT_TYPES.has(file.type)) {
+      setAttachment(null);
+      setAttachmentError("Unsupported file type — PDF, Word doc, or image only.");
+      e.target.value = "";
+      return;
+    }
+    setAttachment(file);
+    setAttachmentError("");
   };
 
   const handleSubmit = async (e) => {
@@ -44,19 +81,18 @@ export default function ProductInquiryForm({ product, items = [] }) {
     setSending(true);
     setError(false);
     try {
-      const res = await fetch("/api/product-inquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: `${form.firstName} ${form.lastName}`.trim(),
-          email: form.email,
-          phone: form.phone,
-          location: form.location,
-          product,
-          productItem: items.length > 0 ? form.productItem : "",
-          message: form.message,
-        }),
-      });
+      const body = new FormData();
+      body.set("name", `${form.firstName} ${form.lastName}`.trim());
+      body.set("email", form.email);
+      body.set("phone", form.phone);
+      body.set("location", form.location);
+      body.set("product", product);
+      body.set("productItem", items.length > 0 ? form.productItem : "");
+      body.set("inquiryType", form.inquiryType);
+      body.set("message", form.message);
+      if (attachment) body.set("attachment", attachment);
+
+      const res = await fetch("/api/product-inquiry", { method: "POST", body });
 
       if (!res.ok) throw new Error("Request failed");
 
@@ -69,8 +105,11 @@ export default function ProductInquiryForm({ product, items = [] }) {
         phone: "",
         location: "",
         productItem: "",
+        inquiryType: "general",
         message: "",
       });
+      setAttachment(null);
+      setAttachmentError("");
     } catch (err) {
       console.error(err);
       setError(true);
@@ -194,6 +233,19 @@ export default function ProductInquiryForm({ product, items = [] }) {
                 ))}
               </select>
             )}
+            <select
+              name="inquiryType"
+              value={form.inquiryType}
+              onChange={handleChange}
+              suppressHydrationWarning
+              className="border border-gray-300 bg-gray-100 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 sm:col-span-2"
+            >
+              {INQUIRY_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
             <textarea
               name="message"
               value={form.message}
@@ -203,6 +255,22 @@ export default function ProductInquiryForm({ product, items = [] }) {
               suppressHydrationWarning
               className="border border-gray-300 bg-gray-100 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none sm:col-span-2"
             ></textarea>
+
+            <label className="sm:col-span-2 flex items-center gap-2 border border-dashed border-gray-300 bg-gray-100 p-3 rounded-lg cursor-pointer text-gray-600 text-sm">
+              <FaPaperclip className="shrink-0" />
+              <span className="truncate">
+                {attachment ? attachment.name : "Attach a PO or design file (optional, max 10MB)"}
+              </span>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
+                onChange={handleAttachmentChange}
+                className="hidden"
+              />
+            </label>
+            {attachmentError && (
+              <p className="sm:col-span-2 text-red-600 text-sm -mt-2">{attachmentError}</p>
+            )}
 
             <button
               type="submit"

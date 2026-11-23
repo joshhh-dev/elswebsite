@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   collection,
@@ -17,6 +16,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useDashboard } from "@/lib/DashboardContext";
+import { logIfUnexpected } from "@/lib/logIfUnexpected";
 import { compressImageToDataUrl, MAX_DATA_URL_BYTES } from "@/lib/imageCompress";
 
 const EMPTY_PRODUCT = {
@@ -139,6 +139,7 @@ function BlockEditor({ block, index, onChange, onRemove }) {
       {block.type === "image" && (
         <div>
           {block.url ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={block.url} alt={block.caption || ""} className="block-image-preview" />
           ) : (
             <p className="subtitle" style={{ margin: "0 0 12px" }}>
@@ -203,6 +204,7 @@ function ProductItemEditor({ item, onChange, onRemove }) {
       </div>
 
       {item.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img src={item.image} alt="" className="block-image-preview" />
       ) : (
         <p className="subtitle" style={{ margin: "0 0 12px" }}>
@@ -400,7 +402,7 @@ function ProductEditor({ product, onSaved, onCancel, onDelete }) {
           Feature on homepage
         </label>
         <p className="subtitle" style={{ margin: "4px 0 0" }}>
-          Shows this product in the homepage`&apos;`s `&quot;`Your turnkey solutions`&quot;` grid. The lowest Order
+          Shows this product in the homepage&apos;s &quot;Your turnkey solutions&quot; grid. The lowest Order
           among featured products becomes the big tile.
         </p>
       </div>
@@ -419,6 +421,7 @@ function ProductEditor({ product, onSaved, onCancel, onDelete }) {
       <div className="field">
         <label>Hero image</label>
         {heroImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={heroImage} alt="" className="block-image-preview" />
         ) : (
           <p className="subtitle" style={{ margin: "0 0 12px" }}>
@@ -516,10 +519,17 @@ export default function ProductsPage() {
   useEffect(() => {
     if (!roleChecked || !canPublish) return;
     const q = query(collection(db, "products"), orderBy("order"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setProducts(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setProducts(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        logIfUnexpected(err);
+        setLoading(false);
+      }
+    );
     return () => unsubscribe();
   }, [roleChecked, canPublish]);
 
