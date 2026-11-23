@@ -18,7 +18,13 @@ async function getProducts() {
     return snapshot.docs
       .map((d) => {
         const data = d.data();
-        return { id: d.id, name: data.name, slug: data.slug, order: data.order ?? 0 };
+        return {
+          id: d.id,
+          name: data.name,
+          slug: data.slug,
+          order: data.order ?? 0,
+          category: data.category || "",
+        };
       })
       .sort((a, b) => a.order - b.order);
   } catch (err) {

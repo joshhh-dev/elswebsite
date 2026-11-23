@@ -1,279 +1,131 @@
-"use client";
+// Redesigned per the Figma full-site redesign (Phase 1 — see
+// project_figma_redesign_phases.md). Hand-coded, like the previous version —
+// unlike product pages, this corporate "About Us" page isn't CMS-driven, so
+// copy changes still need a code change. Content (stats, vision/mission,
+// core values) is text-only in the Figma source, so no new image assets were
+// needed here.
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import Image from "next/image";
+const STATS = [
+  { value: "50,000+", label: "Project and Installations" },
+  { value: "120,000+", label: "Equipment Supplied" },
+  { value: "10,000+", label: "Trainings & Seminars Conducted" },
+  { value: "60+", label: "In-House Experts" },
+  { value: "20+", label: "Nationwide Partners" },
+  { value: "1,500m²", label: "Warehouse Capacity" },
+];
+
+const CORE_VALUES = [
+  "Integrity & Responsible Stewardship",
+  "Customer Commitment and Partnership",
+  "Mastery and Continuous Learning",
+  "Strategic Foresight and Sustainable Innovation",
+  "Excellence and Reliability",
+  "One Team, Shared Success",
+  "Discipline Execution and Accountability",
+];
 
 export default function AboutPage() {
-  // Tap-to-flip state (index-based) — hover-only flip cards don't work on
-  // touch devices, so a click/tap toggle is used for both card sections.
-  const [flippedMissionVision, setFlippedMissionVision] = useState(null);
-  const [flippedProduct, setFlippedProduct] = useState(null);
-
-  const toggleFlip = (setter, index) => {
-    setter((current) => (current === index ? null : index));
-  };
-
-  const productDetails = [
-    {
-      productName: "Laundry Management Systems",
-      description:
-        "Our LMS makes running a laundry business easier, helping owners handle auditing, profit/loss tracking, and shop operations efficiently — even remotely.",
-      image: "/assets/lms_card.webp",
-    },
-    {
-      productName: "Professional Laundry Solutions",
-      description:
-        "We provide high-quality detergents, softeners, and cleaning chemicals to help laundry shops improve their service and increase profitability.",
-      image: "/assets/prols_card.webp",
-    },
-    {
-      productName: "Scarpavapor",
-      description:
-        "A powerful steam generator with integrated vacuum and ozone drying system for cleaning shoes, coats, and various fabrics efficiently.",
-      image: "/assets/scarpa_card.webp",
-    },
-    {
-      productName: "LG Commercial Laundry Equipment",
-      description:
-        "Durable, efficient washers and dryers from LG — ideal for laundromats, hotels, hospitals, and industrial facilities.",
-      image: "/assets/LG_set_card.webp",
-    },
-    {
-      productName: "Lagoon Advanced Care",
-      description:
-        "lagoon® Advanced Care works hand-in-hand with you to boost your business. Resulting from over 20 years of expertise in professional textile care, lagoon® Advanced Care is the first 1-hour-Dry2Dry process.",
-      image: "/assets/lagoon_card.png",
-    },
-  ];
-
   return (
-    <div className="relative flex flex-col min-h-screen bg-gray-50 text-gray-800">
-      {/* ==== HERO SECTION ==== */}
-      <section className="relative flex flex-col items-center justify-center text-center py-32 px-7 overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src="/assets/lg_background.webp"
-            alt="ELS Laundry Equipment"
-            fill
-            className="object-cover brightness-90"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-white/40 to-white"></div>
-        </div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-4xl md:text-6xl font-bold text-black mb-4 relative z-10 drop-shadow-md"
-        >
-          About Us
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="text-base md:text-lg text-black max-w-2xl relative z-10"
-        >
-          Delivering world-class laundry solutions tailored for hospitality,
-          healthcare, and industrial sectors across the Philippines.
-        </motion.p>
-      </section>
-
-      {/* ==== COMPANY OVERVIEW ==== */}
-      <section className="relative py-20 px-6 md:px-14 lg:px-24 bg-gradient-to-b from-white to-blue-50">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-          {/* Left Image */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 1 }}
-            className="rounded-3xl overflow-hidden shadow-2xl"
-          >
-            <Image
-              src="/assets/Lagoon_ELS_Family.webp"
-              alt="ELS Philippines Team"
-              width={600}
-              height={400}
-              className="object-cover w-full h-full"
-            />
-          </motion.div>
-
-          {/* Right Content */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 1 }}
-            className="bg-white/60 backdrop-blur-lg border border-white/50 p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-transform duration-500"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">
-              Who We Are
-            </h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              ELS Philippines Inc. provides complete commercial laundry solutions —
-              from equipment supply, installation, to after-sales service. We
-              partner with leading global brands to deliver reliable and efficient
-              laundry systems tailored to our clients’ specific operational needs.
+    <div className="bg-white text-gray-900">
+      {/* ==== HERO ==== */}
+      <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
+          ABOUT ELS PHILS., INC.
+        </h1>
+        <p className="text-xl md:text-2xl font-semibold mb-8">
+          Complete <span className="text-brand-blue">Laundry Solutions</span>.
+          <br className="hidden md:block" /> From Business Planning to After-Sales.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+          <div className="space-y-4 text-gray-700 leading-relaxed">
+            <p>
+              ELS Phils., Inc. has been serving the Philippine laundry and
+              cleaning industry since 1987, providing professional solutions
+              for entrepreneurs, laundry businesses, hotels, resorts,
+              restaurants, hospitals, institutions, and industrial facilities.
             </p>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Our team is composed of experts with years of experience in the
-              laundry industry, ensuring that every project meets international
-              standards of performance and sustainability.
+            <p>
+              More than an equipment supplier, ELS helps customers plan,
+              build, improve, and maintain laundry operations through
+              professional equipment, business consultation, system planning,
+              installation, training, laundry chemicals, spare parts,
+              technical service, and after-sales support.
             </p>
-            <p className="text-gray-700 leading-relaxed">
-              Since 1987, ELS Phils., Inc. has been the premier laundry supplier in
-              the Philippines — continuously innovating through global partnerships
-              and technological excellence.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ==== MISSION & VISION ==== */}
-      <section className="py-16 sm:py-20 px-4 sm:px-8 md:px-14 lg:px-24 bg-gradient-to-b from-white to-blue-100">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 1 }}
-          className="max-w-6xl mx-auto text-center"
-        >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-10 sm:mb-14">
-            Our Mission & Vision
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
-            {[
-              {
-                title: "Mission",
-                text: "We empower our customers and partners by providing innovative solutions that make their operations more profitable, efficient, and sustainable.",
-              },
-              {
-                title: "Vision",
-                text: "To be the most innovative leader in the laundry and cleaning industry, offering reliable products and services that give customers the best solutions for their needs.",
-              },
-            ].map((item, index) => {
-              const isFlipped = flippedMissionVision === index;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 100 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
-                  role="button"
-                  tabIndex={0}
-                  aria-pressed={isFlipped}
-                  aria-label={`${item.title} — tap to ${isFlipped ? "hide" : "show"} details`}
-                  onClick={() => toggleFlip(setFlippedMissionVision, index)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      toggleFlip(setFlippedMissionVision, index);
-                    }
-                  }}
-                  className="group relative bg-white rounded-3xl shadow-lg overflow-hidden cursor-pointer border border-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-                >
-                  <div
-                    className={`p-8 sm:p-10 bg-gradient-to-t from-blue-50 to-white h-full flex flex-col justify-center items-center transition-all duration-500 ${
-                      isFlipped ? "-translate-y-full" : "translate-y-0"
-                    } sm:group-hover:-translate-y-full`}
-                  >
-                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
-                      {item.title}
-                    </h3>
-                    <span className="text-xs text-gray-400 mt-2 sm:hidden">Tap to read more</span>
-                  </div>
-
-                  <div
-                    className={`absolute inset-0 p-8 sm:p-10 bg-blue-600 text-white flex flex-col justify-center items-center transition-all duration-700 ${
-                      isFlipped ? "translate-y-0" : "translate-y-full"
-                    } sm:group-hover:translate-y-0`}
-                  >
-                    <p className="text-sm sm:text-base leading-relaxed">
-                      {item.text}
-                    </p>
-                  </div>
-                </motion.div>
-              );
-            })}
           </div>
-        </motion.div>
+          <p className="text-gray-700 leading-relaxed md:pl-10 md:border-l md:border-gray-200">
+            Our approach begins with understanding each customer&apos;s actual
+            requirements. We develop solutions based on business objectives,
+            laundry capacity, available space, workflow, utilities, operating
+            costs, quality requirements, and opportunities for future growth.
+          </p>
+        </div>
       </section>
 
-      {/* ==== PRODUCT CARDS ==== */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.8 }}
-        className="py-20 px-4 sm:px-8 md:px-14 lg:px-24 bg-gradient-to-b from-blue-100 to-white"
-      >
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-10 sm:mb-12 text-center">
-          ELS Philippines Products
+      {/* ==== MORE THAN AN EQUIPMENT SUPPLIER (stats) ==== */}
+      <section className="max-w-5xl mx-auto px-6 pb-20 text-center">
+        <h2 className="text-2xl md:text-4xl font-bold mb-4">
+          More Than an Equipment Supplier
         </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 justify-items-center">
-          {productDetails.map((product, index) => {
-            const isFlipped = flippedProduct === index;
-            return (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.3 }}
-                role="button"
-                tabIndex={0}
-                aria-pressed={isFlipped}
-                aria-label={`${product.productName} — tap to ${isFlipped ? "hide" : "show"} details`}
-                onClick={() => toggleFlip(setFlippedProduct, index)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    toggleFlip(setFlippedProduct, index);
-                  }
-                }}
-                className="group perspective w-full h-[360px] sm:h-96 max-w-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-2xl"
-              >
-                <div
-                  className={`relative w-full h-full text-center transition-transform duration-[1000ms] transform-style-preserve-3d shadow-xl rounded-2xl ${
-                    isFlipped ? "rotate-y-180" : ""
-                  } sm:group-hover:rotate-y-180`}
-                >
-                  {/* Front */}
-                  <div className="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 backface-hidden rounded-2xl">
-                    <Image
-                      src={product.image}
-                      alt={product.productName}
-                      width={300}
-                      height={300}
-                      priority={index}
-                      className="rounded-xl mb-4 object-cover shadow-lg"
-                    />
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center">
-                      {product.productName}
-                    </h3>
-                    <span className="text-xs text-gray-400 mt-2 sm:hidden">Tap to read more</span>
-                  </div>
-
-                  {/* Back */}
-                  <div className="absolute inset-0 bg-blue-600 text-white rounded-2xl p-6 backface-hidden rotate-y-180 flex flex-col justify-center items-center">
-                    <h3 className="text-base sm:text-lg font-bold mb-2">
-                      {product.productName}
-                    </h3>
-                    <p className="text-xs sm:text-sm leading-relaxed px-2">
-                      {product.description}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+        <p className="text-gray-600 max-w-3xl mx-auto mb-12">
+          ELS helps customers plan, build, improve and maintain professional
+          laundry operations through equipment, consultation, installation,
+          training, chemicals, technical support and after-sales service.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          {STATS.map((stat) => (
+            <div
+              key={stat.label}
+              className="bg-gray-900 text-white rounded-2xl px-6 py-8"
+            >
+              <div className="text-2xl md:text-3xl font-bold">{stat.value}</div>
+              <div className="text-sm text-gray-300 mt-1">{stat.label}</div>
+            </div>
+          ))}
         </div>
-      </motion.section>
+      </section>
+
+      {/* ==== OUR DIRECTION ==== */}
+      <section className="max-w-5xl mx-auto px-6 pb-20">
+        <h2 className="text-2xl md:text-4xl font-bold text-center mb-12">
+          OUR DIRECTION
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-center">
+          <div>
+            <h3 className="text-xl font-bold mb-3">VISION</h3>
+            <p className="text-gray-700 leading-relaxed">
+              ELS Phils, Inc, is the most innovative leader in the laundry and
+              cleaning industry with excellent and reliable products and
+              services giving our customers the best solutions for their
+              needs.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold mb-3">MISSION</h3>
+            <p className="text-gray-700 leading-relaxed">
+              We professionally empower our customers and partners by
+              providing solutions making their lives easier, more profitable,
+              and more sustainable so that they actively do business with us.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ==== CORE VALUES ==== */}
+      <section className="max-w-5xl mx-auto px-6 pb-24">
+        <h2 className="text-2xl md:text-4xl font-bold text-center mb-12">
+          CORE VALUES
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-10 text-center">
+          {CORE_VALUES.map((value, i) => (
+            <div key={value}>
+              <div className="text-brand-blue text-2xl font-bold mb-2">
+                {String(i + 1).padStart(2, "0")}
+              </div>
+              <p className="text-gray-700">{value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

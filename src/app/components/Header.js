@@ -4,8 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
+import { PRODUCT_CATEGORIES } from "@/lib/productCategories";
 
 const NAV_LINKS = [
   { href: "/rbpn", label: "Find a Dealer" },
@@ -29,6 +30,21 @@ export default function Header({ products = [] }) {
   }, []);
 
   const isProductActive = products.some((p) => `/${p.slug}` === pathname);
+
+  // Groups products under the fixed "Solutions" categories (see
+  // productCategories.js) in a fixed display order, skipping any category
+  // with nothing published under it yet (e.g. Cleaning Solutions/System
+  // Solutions before their Figma-redesign phases ship real products) — an
+  // uncategorized product (category not yet set by the admin) simply
+  // doesn't appear in this menu.
+  const solutionsGroups = useMemo(
+    () =>
+      PRODUCT_CATEGORIES.map((category) => ({
+        category,
+        items: products.filter((p) => p.category === category),
+      })).filter((group) => group.items.length > 0),
+    [products]
+  );
 
   const openProducts = () => {
     clearTimeout(closeTimer.current);
@@ -80,7 +96,11 @@ export default function Header({ products = [] }) {
             Find a Dealer
           </Link>
 
-          {/* ===== Products dropdown ===== */}
+          {/* ===== Solutions mega-menu ===== */}
+          {/* Nothing to show (no product categorized yet) — omit the
+              trigger entirely rather than render a button whose
+              aria-expanded/chevron can flip open with no panel beneath it. */}
+          {solutionsGroups.length > 0 && (
           <div
             className="relative"
             onMouseEnter={openProducts}
@@ -93,7 +113,7 @@ export default function Header({ products = [] }) {
               }`}
               aria-expanded={productsOpen}
             >
-              Products
+              Solutions
               <ChevronDown
                 size={16}
                 className={`transition-transform duration-300 ${productsOpen ? "rotate-180" : ""}`}
@@ -107,25 +127,45 @@ export default function Header({ products = [] }) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute left-0 top-full mt-3 w-52 rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden py-1"
+                  className="absolute right-0 top-full mt-3 w-[32rem] max-w-[90vw] rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden p-5 grid grid-cols-2 gap-x-6 gap-y-5"
                 >
-                  {products.map((product) => (
-                    <Link
-                      key={product.id}
-                      href={`/${product.slug}`}
-                      className={`block px-4 py-3 text-sm font-medium transition-colors ${
-                        pathname === `/${product.slug}`
-                          ? "text-white bg-white/10"
-                          : "text-gray-300 hover:text-white hover:bg-white/5"
-                      }`}
-                    >
-                      {product.name}
-                    </Link>
-                  ))}
+                  {solutionsGroups.map(({ category, items }) =>
+                    items.length === 1 ? (
+                      <Link
+                        key={category}
+                        href={`/${items[0].slug}`}
+                        className={`block text-sm font-semibold transition-colors ${
+                          pathname === `/${items[0].slug}` ? "text-white" : "text-gray-300 hover:text-white"
+                        }`}
+                      >
+                        {category}
+                      </Link>
+                    ) : (
+                      <div key={category}>
+                        <span className="block text-sm font-semibold text-white mb-2">{category}</span>
+                        <div className="flex flex-col gap-1.5">
+                          {items.map((product) => (
+                            <Link
+                              key={product.id}
+                              href={`/${product.slug}`}
+                              className={`text-sm transition-colors ${
+                                pathname === `/${product.slug}`
+                                  ? "text-white"
+                                  : "text-gray-300 hover:text-white"
+                              }`}
+                            >
+                              {product.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
+          )}
 
           <Link
             href="/announcements"
@@ -189,43 +229,70 @@ export default function Header({ products = [] }) {
                 </Link>
               ))}
 
-              {/* Products (expandable) */}
-              <button
-                onClick={() => setMobileProductsOpen((v) => !v)}
-                className={`flex items-center justify-between py-3 text-base font-medium border-b border-white/10 ${
-                  isProductActive ? "text-white" : "text-gray-300"
-                }`}
-              >
-                Products
-                <ChevronDown
-                  size={18}
-                  className={`transition-transform duration-300 ${mobileProductsOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              <AnimatePresence>
-                {mobileProductsOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex flex-col overflow-hidden bg-white/5 rounded-lg my-2"
+              {/* Solutions (expandable) */}
+              {solutionsGroups.length > 0 && (
+                <>
+                  <button
+                    onClick={() => setMobileProductsOpen((v) => !v)}
+                    className={`flex items-center justify-between py-3 text-base font-medium border-b border-white/10 ${
+                      isProductActive ? "text-white" : "text-gray-300"
+                    }`}
                   >
-                    {products.map((product) => (
-                      <Link
-                        key={product.id}
-                        href={`/${product.slug}`}
-                        onClick={() => setMenuOpen(false)}
-                        className={`px-4 py-2.5 text-sm font-medium block ${
-                          pathname === `/${product.slug}` ? "text-white" : "text-gray-300"
-                        }`}
+                    Solutions
+                    <ChevronDown
+                      size={18}
+                      className={`transition-transform duration-300 ${mobileProductsOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {mobileProductsOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex flex-col overflow-hidden bg-white/5 rounded-lg my-2 px-4 py-2"
                       >
-                        {product.name}
-                      </Link>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        {solutionsGroups.map(({ category, items }) => (
+                          <div key={category} className="py-2">
+                            {items.length === 1 ? (
+                              <Link
+                                href={`/${items[0].slug}`}
+                                onClick={() => setMenuOpen(false)}
+                                className={`text-sm font-semibold block ${
+                                  pathname === `/${items[0].slug}` ? "text-white" : "text-gray-200"
+                                }`}
+                              >
+                                {category}
+                              </Link>
+                            ) : (
+                              <>
+                                <span className="text-sm font-semibold text-gray-200 block mb-1.5">
+                                  {category}
+                                </span>
+                                <div className="flex flex-col gap-1.5 pl-3">
+                                  {items.map((product) => (
+                                    <Link
+                                      key={product.id}
+                                      href={`/${product.slug}`}
+                                      onClick={() => setMenuOpen(false)}
+                                      className={`text-sm block ${
+                                        pathname === `/${product.slug}` ? "text-white" : "text-gray-300"
+                                      }`}
+                                    >
+                                      {product.name}
+                                    </Link>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
 
               {NAV_LINKS.slice(1).map((link) => (
                 <Link

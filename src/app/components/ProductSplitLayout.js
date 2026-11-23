@@ -1,6 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import {
+  KeyFeaturesBlock,
+  AdvantagesBlock,
+  BenefitsBlock,
+  RelatedProductsBlock,
+} from "@/app/components/ProductBlocks";
 
 // "split" product template — recreates the original per-product pages'
 // alternating two-column design (text/image side by side, flipping sides
@@ -45,7 +51,7 @@ function TextContent({ block }) {
   );
 }
 
-function SingleBlock({ block }) {
+function SingleBlock({ block, relatedProducts }) {
   return (
     <div className="max-w-4xl mx-auto w-full">
       {block.type === "image" && block.url ? (
@@ -56,6 +62,14 @@ function SingleBlock({ block }) {
             <figcaption className="text-sm text-gray-500 mt-2 text-center">{block.caption}</figcaption>
           )}
         </figure>
+      ) : block.type === "keyFeatures" ? (
+        <KeyFeaturesBlock block={block} />
+      ) : block.type === "advantages" ? (
+        <AdvantagesBlock block={block} />
+      ) : block.type === "benefits" ? (
+        <BenefitsBlock block={block} />
+      ) : block.type === "relatedProducts" ? (
+        <RelatedProductsBlock relatedProducts={relatedProducts} />
       ) : (
         <TextContent block={block} />
       )}
@@ -63,7 +77,7 @@ function SingleBlock({ block }) {
   );
 }
 
-export default function ProductSplitLayout({ blocks = [] }) {
+export default function ProductSplitLayout({ blocks = [], relatedProducts }) {
   const sections = pairBlocks(blocks);
 
   return (
@@ -71,7 +85,7 @@ export default function ProductSplitLayout({ blocks = [] }) {
       <div className="max-w-6xl mx-auto flex flex-col gap-16">
         {sections.map((section, i) => {
           if (section.type === "single") {
-            return <SingleBlock key={i} block={section.block} />;
+            return <SingleBlock key={i} block={section.block} relatedProducts={relatedProducts} />;
           }
 
           const reverse = i % 2 === 1;

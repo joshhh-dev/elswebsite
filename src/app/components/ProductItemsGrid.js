@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -8,10 +8,34 @@ import { AnimatePresence, motion } from "framer-motion";
 // LG washer/dryer models) as their own grid section — admin-managed via the
 // "Our Products" field in the dashboard's Products editor. Cards are
 // clickable, opening a modal with the full image + description.
+//
+// An optional free-text `item.group` (e.g. "Retail and Commercial Laundry
+// Products" vs "Industrial Laundry Chemicals" on the ProLS page, matching
+// the Figma redesign's tabbed catalog) turns on a tab filter above the
+// grid — only when at least 2 distinct groups are actually present, so
+// ungrouped items (every product before this feature, e.g. LG's items)
+// keep rendering as a single flat grid exactly as before.
 export default function ProductItemsGrid({ items = [] }) {
   const [selected, setSelected] = useState(null);
 
+  const groups = useMemo(() => {
+    const seen = [];
+    items.forEach((item) => {
+      if (item.group && !seen.includes(item.group)) seen.push(item.group);
+    });
+    return seen;
+  }, [items]);
+
+  const [activeGroup, setActiveGroup] = useState(null);
+  const effectiveGroup = activeGroup ?? groups[0] ?? null;
+
   if (items.length === 0) return null;
+
+  // Ungrouped items (no `group` set) are shown under every tab instead of
+  // vanishing entirely — only items actually assigned to a DIFFERENT group
+  // get filtered out.
+  const visibleItems =
+    groups.length > 1 ? items.filter((item) => !item.group || item.group === effectiveGroup) : items;
 
   return (
     <section className="relative py-16 px-6 md:px-12 lg:px-20 bg-surface-muted">
@@ -19,8 +43,26 @@ export default function ProductItemsGrid({ items = [] }) {
         <h2 className="text-2xl md:text-3xl font-bold text-brand-navy mb-10 text-center">
           Our Products
         </h2>
+        {groups.length > 1 && (
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {groups.map((group) => (
+              <button
+                key={group}
+                type="button"
+                onClick={() => setActiveGroup(group)}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
+                  effectiveGroup === group
+                    ? "bg-brand-blue text-white"
+                    : "bg-white text-gray-600 border border-border-muted hover:border-brand-blue"
+                }`}
+              >
+                {group}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {items.map((item, i) => (
+          {visibleItems.map((item, i) => (
             <button
               key={i}
               type="button"

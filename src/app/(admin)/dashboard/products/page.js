@@ -18,6 +18,7 @@ import { db } from "@/lib/firebase";
 import { useDashboard } from "@/lib/DashboardContext";
 import { logIfUnexpected } from "@/lib/logIfUnexpected";
 import { compressImageToDataUrl, MAX_DATA_URL_BYTES } from "@/lib/imageCompress";
+import { PRODUCT_CATEGORIES } from "@/lib/productCategories";
 
 const EMPTY_PRODUCT = {
   name: "",
@@ -27,6 +28,7 @@ const EMPTY_PRODUCT = {
   order: 0,
   template: "stacked",
   featuredOnHome: false,
+  category: "",
   blocks: [],
   items: [],
   status: "draft",
@@ -37,7 +39,7 @@ const TEMPLATE_OPTIONS = [
   { value: "split", label: "Two-Column (feature layout)" },
 ];
 
-const EMPTY_PRODUCT_ITEM = { name: "", image: "", description: "" };
+const EMPTY_PRODUCT_ITEM = { name: "", image: "", description: "", group: "" };
 
 function slugify(value) {
   return value
@@ -86,8 +88,34 @@ function BlockEditor({ block, index, onChange, onRemove }) {
     onChange({ ...block, items: [...(block.items || []), ""] });
   };
 
+  // benefits items are {title, description} objects, unlike the plain
+  // string items every other list-shaped block uses above.
+  const updateBenefitItem = (itemIndex, field, value) => {
+    const items = [...(block.items || [])];
+    items[itemIndex] = { ...items[itemIndex], [field]: value };
+    onChange({ ...block, items });
+  };
+  const removeBenefitItem = (itemIndex) => {
+    onChange({ ...block, items: (block.items || []).filter((_, i) => i !== itemIndex) });
+  };
+  const addBenefitItem = () => {
+    onChange({ ...block, items: [...(block.items || []), { title: "", description: "" }] });
+  };
+
   const typeLabel =
-    block.type === "text" ? "Text block" : block.type === "list" ? "Feature list block" : "Image block";
+    block.type === "text"
+      ? "Text block"
+      : block.type === "list"
+      ? "Feature list block"
+      : block.type === "image"
+      ? "Image block"
+      : block.type === "keyFeatures"
+      ? "Key Features block"
+      : block.type === "advantages"
+      ? "Advantages block"
+      : block.type === "benefits"
+      ? "Benefits-to-laundry block"
+      : "Related Products block";
 
   return (
     <div className="block-editor">
@@ -164,6 +192,115 @@ function BlockEditor({ block, index, onChange, onRemove }) {
           />
         </div>
       )}
+
+      {(block.type === "keyFeatures" || block.type === "advantages") && (
+        <div>
+          <input
+            type="text"
+            value={block.label || ""}
+            onChange={(e) => onChange({ ...block, label: e.target.value })}
+            placeholder={block.type === "keyFeatures" ? "Label (e.g. KEY FEATURES)" : "Label (e.g. ADVANTAGES)"}
+            style={{ marginBottom: 10 }}
+          />
+          <input
+            type="text"
+            value={block.headline || ""}
+            onChange={(e) => onChange({ ...block, headline: e.target.value })}
+            placeholder="Headline"
+            style={{ marginBottom: 10 }}
+          />
+          {block.type === "keyFeatures" && (
+            <select
+              value={block.columns === 3 ? 3 : 2}
+              onChange={(e) => onChange({ ...block, columns: Number(e.target.value) })}
+              style={{ marginBottom: 10 }}
+            >
+              <option value={2}>2 columns</option>
+              <option value={3}>3 columns</option>
+            </select>
+          )}
+          {(block.items || []).map((item, i) => (
+            <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <input
+                type="text"
+                value={item}
+                onChange={(e) => updateListItem(i, e.target.value)}
+                placeholder={`Item ${i + 1}`}
+                style={{ flex: 1 }}
+              />
+              <button type="button" className="block-remove-btn" onClick={() => removeListItem(i)}>
+                Remove
+              </button>
+            </div>
+          ))}
+          <button type="button" className="status-toggle-btn" onClick={addListItem}>
+            + Add Item
+          </button>
+        </div>
+      )}
+
+      {block.type === "benefits" && (
+        <div>
+          <input
+            type="text"
+            value={block.label || ""}
+            onChange={(e) => onChange({ ...block, label: e.target.value })}
+            placeholder="Label (e.g. BENEFITS TO LAUNDRY)"
+            style={{ marginBottom: 10 }}
+          />
+          <input
+            type="text"
+            value={block.headline || ""}
+            onChange={(e) => onChange({ ...block, headline: e.target.value })}
+            placeholder="Headline"
+            style={{ marginBottom: 10 }}
+          />
+          {(block.items || []).map((item, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+                marginBottom: 10,
+                paddingBottom: 10,
+                borderBottom: "1px solid var(--border)",
+              }}
+            >
+              <input
+                type="text"
+                value={item.title || ""}
+                onChange={(e) => updateBenefitItem(i, "title", e.target.value)}
+                placeholder={`Benefit ${i + 1} title (e.g. CONSISTENT STEAM PERFORMANCE)`}
+              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  type="text"
+                  value={item.description || ""}
+                  onChange={(e) => updateBenefitItem(i, "description", e.target.value)}
+                  placeholder="Description"
+                  style={{ flex: 1 }}
+                />
+                <button type="button" className="block-remove-btn" onClick={() => removeBenefitItem(i)}>
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+          <button type="button" className="status-toggle-btn" onClick={addBenefitItem}>
+            + Add Benefit
+          </button>
+        </div>
+      )}
+
+      {block.type === "relatedProducts" && (
+        <p className="subtitle" style={{ margin: 0 }}>
+          Automatically shows other published products sharing this product&apos;s Solutions-menu
+          category (see the Category field above) — nothing to configure here. If this product has
+          no category set, or no other published products share it, this section won&apos;t show
+          anything on the live page.
+        </p>
+      )}
     </div>
   );
 }
@@ -229,6 +366,17 @@ function ProductItemEditor({ item, onChange, onRemove }) {
         placeholder="Short description"
         style={{ marginTop: 10 }}
       />
+      <input
+        type="text"
+        value={item.group || ""}
+        onChange={(e) => onChange({ ...item, group: e.target.value })}
+        placeholder="Tab group (optional, e.g. Retail and Commercial Laundry Products)"
+        style={{ marginTop: 10 }}
+      />
+      <p className="subtitle" style={{ margin: "4px 0 0" }}>
+        Give 2+ products the same tab-group text to split &quot;Our Products&quot; into filter tabs on
+        the public page. Leave blank to keep it in one flat grid.
+      </p>
     </div>
   );
 }
@@ -239,6 +387,7 @@ function ProductEditor({ product, onSaved, onCancel, onDelete }) {
   const [tagline, setTagline] = useState(product.tagline || "");
   const [heroImage, setHeroImage] = useState(product.heroImage || "");
   const [order, setOrder] = useState(product.order ?? 0);
+  const [category, setCategory] = useState(product.category || "");
   const [template, setTemplate] = useState(product.template || "stacked");
   const [featuredOnHome, setFeaturedOnHome] = useState(product.featuredOnHome || false);
   const [blocks, setBlocks] = useState(product.blocks);
@@ -259,7 +408,15 @@ function ProductEditor({ product, onSaved, onCancel, onDelete }) {
         ? { type: "text", content: "" }
         : type === "list"
         ? { type: "list", heading: "", items: [""] }
-        : { type: "image", url: "", caption: "" };
+        : type === "image"
+        ? { type: "image", url: "", caption: "" }
+        : type === "keyFeatures"
+        ? { type: "keyFeatures", label: "KEY FEATURES", headline: "", items: [""], columns: 2 }
+        : type === "advantages"
+        ? { type: "advantages", label: "ADVANTAGES", headline: "", items: [""] }
+        : type === "benefits"
+        ? { type: "benefits", label: "BENEFITS TO LAUNDRY", headline: "", items: [{ title: "", description: "" }] }
+        : { type: "relatedProducts" };
     setBlocks((prev) => [...prev, shape]);
   };
 
@@ -322,6 +479,7 @@ function ProductEditor({ product, onSaved, onCancel, onDelete }) {
         tagline: tagline.trim(),
         heroImage,
         order: Number(order) || 0,
+        category,
         template,
         featuredOnHome,
         blocks,
@@ -392,6 +550,26 @@ function ProductEditor({ product, onSaved, onCancel, onDelete }) {
       </div>
 
       <div className="field">
+        <label htmlFor="productCategory">Solutions menu category</label>
+        <select
+          id="productCategory"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="">— Not shown in Solutions menu —</option>
+          {PRODUCT_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+        <p className="subtitle" style={{ margin: "4px 0 0" }}>
+          Which group this appears under in the site header&apos;s &quot;Solutions&quot; menu. Leave
+          unset to keep it out of that menu for now.
+        </p>
+      </div>
+
+      <div className="field">
         <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <input
             type="checkbox"
@@ -453,6 +631,18 @@ function ProductEditor({ product, onSaved, onCancel, onDelete }) {
         </button>
         <button type="button" className="status-toggle-btn" onClick={() => addBlock("image")}>
           + Add Image
+        </button>
+        <button type="button" className="status-toggle-btn" onClick={() => addBlock("keyFeatures")}>
+          + Add Key Features
+        </button>
+        <button type="button" className="status-toggle-btn" onClick={() => addBlock("advantages")}>
+          + Add Advantages
+        </button>
+        <button type="button" className="status-toggle-btn" onClick={() => addBlock("benefits")}>
+          + Add Benefits
+        </button>
+        <button type="button" className="status-toggle-btn" onClick={() => addBlock("relatedProducts")}>
+          + Add Related Products
         </button>
       </div>
 
