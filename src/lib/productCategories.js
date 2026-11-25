@@ -9,4 +9,5 @@ export const PRODUCT_CATEGORIES = [
   "System Solutions",
   "Cleaning Solutions",
   "Display/Ads Solutions",
+  "Laundry Essentials",
 ];

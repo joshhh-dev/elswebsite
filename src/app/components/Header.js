@@ -15,13 +15,29 @@ const NAV_LINKS = [
   { href: "/quick-links/contact", label: "Contact" },
 ];
 
+// Fixed list, not Firestore-driven like Solutions' PRODUCT_CATEGORIES groups —
+// these 3 pages (Figma redesign Phases 5-6) have no category field of their
+// own and were previously reachable only via direct link. A static list is
+// enough since this isn't expected to grow the way product categories do.
+const BUSINESS_SOLUTIONS_LINKS = [
+  { href: "/business-solutions", label: "Business Solutions" },
+  { href: "/muli", label: "My Urban Laundry (MULI)" },
+  { href: "/technical-after-sales", label: "Technical & After-Sales" },
+  { href: "/training-development", label: "Training and Development" },
+];
+
 export default function Header({ products = [] }) {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
-  const closeTimer = useRef(null);
+  const [businessOpen, setBusinessOpen] = useState(false);
+  const [mobileBusinessOpen, setMobileBusinessOpen] = useState(false);
+  // Keyed by dropdown name so both hover-dropdowns (and any future one) share
+  // one open/delayed-close helper pair instead of each getting its own
+  // state+ref+timeout boilerplate.
+  const closeTimers = useRef({});
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -30,6 +46,7 @@ export default function Header({ products = [] }) {
   }, []);
 
   const isProductActive = products.some((p) => `/${p.slug}` === pathname);
+  const isBusinessActive = BUSINESS_SOLUTIONS_LINKS.some((l) => l.href === pathname);
 
   // Groups products under the fixed "Solutions" categories (see
   // productCategories.js) in a fixed display order, skipping any category
@@ -46,12 +63,12 @@ export default function Header({ products = [] }) {
     [products]
   );
 
-  const openProducts = () => {
-    clearTimeout(closeTimer.current);
-    setProductsOpen(true);
+  const openDropdown = (key, setOpen) => {
+    clearTimeout(closeTimers.current[key]);
+    setOpen(true);
   };
-  const scheduleCloseProducts = () => {
-    closeTimer.current = setTimeout(() => setProductsOpen(false), 150);
+  const scheduleCloseDropdown = (key, setOpen) => {
+    closeTimers.current[key] = setTimeout(() => setOpen(false), 150);
   };
 
   return (
@@ -103,8 +120,8 @@ export default function Header({ products = [] }) {
           {solutionsGroups.length > 0 && (
           <div
             className="relative"
-            onMouseEnter={openProducts}
-            onMouseLeave={scheduleCloseProducts}
+            onMouseEnter={() => openDropdown("products", setProductsOpen)}
+            onMouseLeave={() => scheduleCloseDropdown("products", setProductsOpen)}
           >
             <button
               onClick={() => setProductsOpen((v) => !v)}
@@ -166,6 +183,52 @@ export default function Header({ products = [] }) {
             </AnimatePresence>
           </div>
           )}
+
+          {/* ===== Business Solutions dropdown (MULI, Technical & After-Sales,
+              Training and Development — Figma redesign Phases 5-6) ===== */}
+          <div
+            className="relative"
+            onMouseEnter={() => openDropdown("business", setBusinessOpen)}
+            onMouseLeave={() => scheduleCloseDropdown("business", setBusinessOpen)}
+          >
+            <button
+              onClick={() => setBusinessOpen((v) => !v)}
+              className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors ${
+                isBusinessActive ? "text-white" : "text-gray-300 hover:text-white"
+              }`}
+              aria-expanded={businessOpen}
+            >
+              Business Solutions
+              <ChevronDown
+                size={16}
+                className={`transition-transform duration-300 ${businessOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            <AnimatePresence>
+              {businessOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 top-full mt-3 w-64 rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden p-4 flex flex-col gap-2.5"
+                >
+                  {BUSINESS_SOLUTIONS_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`text-sm transition-colors ${
+                        pathname === link.href ? "text-white font-semibold" : "text-gray-300 hover:text-white"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <Link
             href="/announcements"
@@ -293,6 +356,44 @@ export default function Header({ products = [] }) {
                   </AnimatePresence>
                 </>
               )}
+
+              {/* Business Solutions (expandable) */}
+              <button
+                onClick={() => setMobileBusinessOpen((v) => !v)}
+                className={`flex items-center justify-between py-3 text-base font-medium border-b border-white/10 ${
+                  isBusinessActive ? "text-white" : "text-gray-300"
+                }`}
+              >
+                Business Solutions
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform duration-300 ${mobileBusinessOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {mobileBusinessOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex flex-col overflow-hidden bg-white/5 rounded-lg my-2 px-4 py-2"
+                  >
+                    {BUSINESS_SOLUTIONS_LINKS.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMenuOpen(false)}
+                        className={`text-sm py-2 block ${
+                          pathname === link.href ? "text-white" : "text-gray-300"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {NAV_LINKS.slice(1).map((link) => (
                 <Link
