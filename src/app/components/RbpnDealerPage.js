@@ -78,6 +78,10 @@ export default function RbpnDealerPage({ slug }) {
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center">
       <section className="py-20 px-6 max-w-4xl text-center">
+        <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold tracking-wide uppercase px-3 py-1 rounded-full mb-4">
+          Regional Business Partner
+        </span>
+
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -96,15 +100,60 @@ export default function RbpnDealerPage({ slug }) {
           commercial and self-service laundromats.
         </p>
 
-        <p className="text-gray-700 font-medium">📍 Location: {dealer.area}</p>
-        <p className="text-gray-700 font-medium mt-2">
-          📞 Contact: {dealer.phone}
-        </p>
-        {dealer.email && (
-          <p className="text-gray-700 font-medium mt-2">
-            📧 Email: {dealer.email}
+        {/* Area Covered */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-8 text-left max-w-2xl mx-auto">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-1">
+            Area Covered
+          </h2>
+          {dealer.territories?.length > 1 && (
+            <p className="text-xs text-gray-400 mb-3">
+              <span className="text-amber-500">●</span> Preferred Territory —
+              home base &nbsp;&nbsp;
+              <span className="text-green-500">●</span> Open for RBPN
+              Assignment, not yet formally served
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {(dealer.territories?.length ? dealer.territories : [dealer.area]).map(
+              (territory, i) => (
+                <span
+                  key={territory}
+                  className="inline-flex items-center gap-1.5 text-sm text-gray-700 bg-gray-100 rounded-full px-3 py-1"
+                >
+                  <span
+                    className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${
+                      i === 0 ? "bg-amber-400" : "bg-green-400"
+                    }`}
+                  />
+                  {territory}
+                </span>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Contact Information */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-left max-w-2xl mx-auto">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-3">
+            Contact Information
+          </h2>
+          <p className="text-gray-700 font-medium">
+            📍 Location: {dealer.area}
           </p>
-        )}
+          {dealer.contactPerson && (
+            <p className="text-gray-700 font-medium mt-2">
+              🧑 Contact Person: {dealer.contactPerson}
+            </p>
+          )}
+          <p className="text-gray-700 font-medium mt-2">
+            📞 Mobile Number: {dealer.phone}
+          </p>
+          {dealer.email && (
+            <p className="text-gray-700 font-medium mt-2">
+              📧 Email Address: {dealer.email}
+            </p>
+          )}
+        </div>
       </section>
 
       {/* Inquiry Form Section */}

@@ -4,6 +4,13 @@
 // inquiry form. Keep this in sync with the official RBPN Details sheet.
 //
 // slug maps 1:1 to a folder under src/app/rbpn/{slug} (the dealer's page route).
+//
+// `territories`: real province/city coverage transcribed from the official
+// "Philippine RBP Territory Coverage" map. territories[0] is always the
+// dealer's Preferred Territory (their home base — matches `area` above);
+// any remaining entries are their Assigned Territory (additional coverage
+// area). This ordering is a real distinction in the source map (shown there
+// as orange vs. green legend dots), not an arbitrary list order.
 
 // lat/lng below are approximate city/province center coordinates — good
 // enough for "nearest dealer" heuristics, not for precision navigation.
@@ -20,6 +27,7 @@ export const rbpnDealers = [
     contactPerson: "April",
     lat: 13.6218,
     lng: 123.1948,
+    territories: ["Naga", "Albay", "Camarines Sur", "Camarines Norte", "Catanduanes", "Masbate", "Sorsogon"],
   },
   {
     slug: "marikina",
@@ -33,6 +41,7 @@ export const rbpnDealers = [
     contactPerson: "Blessie / Dennis",
     lat: 14.6507,
     lng: 121.1029,
+    territories: ["Marikina", "Pasig", "Mandaluyong", "San Juan"],
   },
   {
     slug: "cavite",
@@ -46,6 +55,7 @@ export const rbpnDealers = [
     contactPerson: "Tey",
     lat: 14.2456,
     lng: 120.8761,
+    territories: ["Cavite"],
   },
   {
     slug: "laguna",
@@ -59,6 +69,7 @@ export const rbpnDealers = [
     contactPerson: "Yhong Estallano",
     lat: 14.2691,
     lng: 121.4113,
+    territories: ["Laguna"],
   },
   {
     slug: "cebu",
@@ -72,6 +83,7 @@ export const rbpnDealers = [
     contactPerson: "Myca / Marla Barro",
     lat: 10.3157,
     lng: 123.8854,
+    territories: ["Cebu"],
   },
   {
     slug: "davao",
@@ -85,6 +97,37 @@ export const rbpnDealers = [
     contactPerson: "Pan / Charline Bucaling",
     lat: 7.1907,
     lng: 125.4553,
+    territories: [
+      "Davao City",
+      "Davao Del Sur",
+      "Davao Occidental",
+      "Davao Oriental",
+      "Davao De Oro",
+      "Davao Del Norte",
+      "Surigao Del Norte",
+      "Surigao Del Sur",
+      "Agusan Del Sur",
+      "Dinagat Islands",
+      "Saranggani",
+      "South Cotabato",
+      "Sultan Kudarat",
+      "Cotabato",
+      "Lanao Del Sur",
+      "Maguindanao Del Norte",
+      "Maguindanao Del Sur",
+      "Basilan",
+      "Sulu",
+      "Tawi-Tawi",
+      "Zamboanga Del Norte",
+      "Zamboanga Del Sur",
+      "Zamboanga Sibugay",
+      "Zamboanga City",
+      "Misamis Occidental",
+      "Misamis Oriental",
+      "Lanao Del Norte",
+      "Bukidnon",
+      "General Santos City",
+    ],
   },
   {
     slug: "manila",
@@ -98,6 +141,7 @@ export const rbpnDealers = [
     contactPerson: "May / Jinkee",
     lat: 14.5995,
     lng: 120.9842,
+    territories: ["Manila", "Makati", "Taguig", "Pateros (Municipality)", "Pasay", "Parañaque", "Las Piñas", "Muntinlupa"],
   },
   {
     slug: "antique",
@@ -111,6 +155,7 @@ export const rbpnDealers = [
     contactPerson: "Sheryl Osorio",
     lat: 10.745,
     lng: 121.9339,
+    territories: ["Antique", "Palawan", "Romblon", "Aklan", "Capiz", "Guimaras"],
   },
   {
     slug: "pangasinan",
@@ -124,6 +169,7 @@ export const rbpnDealers = [
     contactPerson: "Byorn",
     lat: 16.0217,
     lng: 120.2325,
+    territories: ["Pangasinan", "Ilocos Norte", "Ilocos Sur", "La Union"],
   },
   {
     slug: "pampanga",
@@ -137,6 +183,7 @@ export const rbpnDealers = [
     contactPerson: "Carina / Jessal",
     lat: 15.0349,
     lng: 120.6839,
+    territories: ["Pampanga", "Nueva Ecija"],
   },
   {
     slug: "quezoncity",
@@ -150,6 +197,7 @@ export const rbpnDealers = [
     contactPerson: "Buen / Dennis",
     lat: 14.676,
     lng: 121.0437,
+    territories: ["Quezon City", "Valenzuela", "Caloocan", "Navotas", "Malabon"],
   },
   {
     slug: "bohol",
@@ -163,6 +211,7 @@ export const rbpnDealers = [
     contactPerson: "Roy",
     lat: 9.6474,
     lng: 123.8536,
+    territories: ["Bohol", "Biliran", "Eastern Samar", "Leyte", "Northern Samar", "Samar", "Southern Leyte"],
   },
   {
     slug: "ilo-ilo",
@@ -176,6 +225,7 @@ export const rbpnDealers = [
     contactPerson: "Maxene / Pearl",
     lat: 10.7202,
     lng: 122.5621,
+    territories: ["Iloilo", "Negros Occidental", "Negros Oriental", "Siquijor"],
   },
   {
     slug: "bulacan",
@@ -189,6 +239,7 @@ export const rbpnDealers = [
     contactPerson: "Arwin",
     lat: 14.8433,
     lng: 120.8113,
+    territories: ["Bulacan"],
   },
   {
     slug: "quezonprovince",
@@ -202,6 +253,7 @@ export const rbpnDealers = [
     contactPerson: "Leilani",
     lat: 13.9314,
     lng: 121.6169,
+    territories: ["Quezon", "Marinduque"],
   },
   {
     slug: "tarlac",
@@ -215,6 +267,21 @@ export const rbpnDealers = [
     contactPerson: "Raymond",
     lat: 15.4802,
     lng: 120.5979,
+    territories: [
+      "Tarlac",
+      "Abra",
+      "Apayao",
+      "Benguet",
+      "Ifugao",
+      "Kalinga",
+      "Mountain Province",
+      "Batanes",
+      "Cagayan",
+      "Isabela",
+      "Nueva Vizcaya",
+      "Quirino",
+      "Zambales",
+    ],
   },
   {
     slug: "batangas",
@@ -228,6 +295,7 @@ export const rbpnDealers = [
     contactPerson: "Nestlee / Del",
     lat: 13.7565,
     lng: 121.0583,
+    territories: ["Batangas", "Occidental Mindoro", "Oriental Mindoro"],
   },
   {
     slug: "bataan",
@@ -241,6 +309,7 @@ export const rbpnDealers = [
     contactPerson: "Anna Leigh",
     lat: 14.6761,
     lng: 120.5361,
+    territories: ["Bataan", "Aurora"],
   },
   {
     slug: "rizal",
@@ -254,6 +323,7 @@ export const rbpnDealers = [
     contactPerson: "Jandy",
     lat: 14.5878,
     lng: 121.176,
+    territories: ["Rizal"],
   },
 ];
 

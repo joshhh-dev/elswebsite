@@ -9,6 +9,11 @@ import { AnimatePresence } from "framer-motion";
 import DealerAvatar from "../../components/DealerAvatar";
 import { rbpnDealers } from "@/lib/rbpnDealers";
 
+// Real "Philippine RBP Territory Coverage" map (see rbpn-territory-map.jpg),
+// transcribed per-dealer into rbpnDealers.js's `territories` field. The map
+// image is dense at mobile width, so this text list is the accessible/mobile
+// fallback, not just a caption.
+
 export default function FindADealerPage() {
   const dealers = rbpnDealers.map((dealer) => ({
     name: dealer.company,
@@ -103,6 +108,76 @@ export default function FindADealerPage() {
 </section>
 
 
+
+      {/* Territory Coverage */}
+      <section className="flex flex-col items-center py-12 px-4 sm:px-6 md:px-8 bg-gray-50">
+        <div className="max-w-6xl w-full">
+          <h2 className="text-2xl md:text-4xl font-bold text-center text-gray-800 mb-3">
+            Philippine RBP Territory Coverage
+          </h2>
+          <p className="text-gray-600 text-center max-w-3xl mx-auto mb-4">
+            Each Regional Business Partner has a Preferred Territory — their
+            home base, where they&apos;re the active local partner. Nearby
+            provinces shown as open are not yet formally served by any
+            partner; ELS may assign coverage there as the network grows —{" "}
+            <Link href="/rbpn-dealer" className="text-blue-600 underline">
+              apply to become one
+            </Link>
+            .
+          </p>
+
+          <div className="flex items-center justify-center gap-5 text-xs text-gray-500 mb-10">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
+              Preferred Territory
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full bg-green-400" />
+              Open for RBPN Assignment
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white">
+              <Image
+                src="/assets/rbpn-territory-map.jpg"
+                alt="Philippine RBP Territory Coverage map"
+                width={680}
+                height={1290}
+                className="w-full h-auto"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+              {rbpnDealers.map((dealer) => (
+                <div
+                  key={dealer.slug}
+                  className="bg-white rounded-xl border border-gray-200 p-4"
+                >
+                  <Link
+                    href={`/rbpn/${dealer.slug}`}
+                    className="font-semibold text-gray-800 hover:text-blue-600"
+                  >
+                    {dealer.aka}
+                  </Link>
+                  <ul className="mt-2 space-y-1 text-sm text-gray-600">
+                    {dealer.territories.map((territory, i) => (
+                      <li key={territory} className="flex items-center gap-2">
+                        <span
+                          className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${
+                            i === 0 ? "bg-amber-400" : "bg-green-400"
+                          }`}
+                        />
+                        {territory}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Dealer Cards */}
       <section className="flex flex-col items-center py-12 px-4 sm:px-6 md:px-8">
