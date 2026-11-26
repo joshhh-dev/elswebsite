@@ -5,7 +5,7 @@ import { adminDb } from "@/lib/firebaseAdmin";
 // New hub page from the Figma redesign's exhaustive re-scan (16.png) — hand-
 // coded like Quick Links/About, not CMS-driven, since it's a fixed
 // navigational page rather than an admin-managed product. Pulls the real
-// hero photos for the 2 live products (LaundrysAPP, MULI) straight from
+// hero photos for the 2 live products (LaundryshAPP, MULI) straight from
 // their existing Firestore docs instead of duplicating/hardcoding image
 // data here, so they stay in sync if those products' images ever change.
 export const revalidate = 60;

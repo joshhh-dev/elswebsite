@@ -5,25 +5,17 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Search } from "lucide-react";
 import { PRODUCT_CATEGORIES } from "@/lib/productCategories";
 
+// Simplified nav (Figma redesign) — Home / About Us / Solutions / Announcements
+// / Contact us. "Find a Dealer" and the Business Solutions pages (Business
+// Solutions hub, MULI, Technical & After-Sales, Training and Development,
+// EMPOWER360) are no longer in the top nav — they're still reachable via the
+// Footer's Quick Links instead (see Footer.js).
 const NAV_LINKS = [
-  { href: "/rbpn", label: "Find a Dealer" },
-  { href: "/announcements", label: "Announcements" },
-  { href: "/quick-links/about", label: "About" },
-  { href: "/quick-links/contact", label: "Contact" },
-];
-
-// Fixed list, not Firestore-driven like Solutions' PRODUCT_CATEGORIES groups —
-// these 3 pages (Figma redesign Phases 5-6) have no category field of their
-// own and were previously reachable only via direct link. A static list is
-// enough since this isn't expected to grow the way product categories do.
-const BUSINESS_SOLUTIONS_LINKS = [
-  { href: "/business-solutions", label: "Business Solutions" },
-  { href: "/muli", label: "My Urban Laundry (MULI)" },
-  { href: "/technical-after-sales", label: "Technical & After-Sales" },
-  { href: "/training-development", label: "Training and Development" },
+  { href: "/", label: "Home" },
+  { href: "/quick-links/about", label: "About Us" },
 ];
 
 export default function Header({ products = [] }) {
@@ -32,11 +24,8 @@ export default function Header({ products = [] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
-  const [businessOpen, setBusinessOpen] = useState(false);
-  const [mobileBusinessOpen, setMobileBusinessOpen] = useState(false);
-  // Keyed by dropdown name so both hover-dropdowns (and any future one) share
-  // one open/delayed-close helper pair instead of each getting its own
-  // state+ref+timeout boilerplate.
+  // Keyed by dropdown name so any hover-dropdown shares one open/delayed-close
+  // helper pair instead of each getting its own state+ref+timeout boilerplate.
   const closeTimers = useRef({});
 
   useEffect(() => {
@@ -46,7 +35,6 @@ export default function Header({ products = [] }) {
   }, []);
 
   const isProductActive = products.some((p) => `/${p.slug}` === pathname);
-  const isBusinessActive = BUSINESS_SOLUTIONS_LINKS.some((l) => l.href === pathname);
 
   // Groups products under the fixed "Solutions" categories (see
   // productCategories.js) in a fixed display order, skipping any category
@@ -87,7 +75,7 @@ export default function Header({ products = [] }) {
             alt="ELS Circle"
             width={125}
             height={80}
-            className="h-14 w-14 md:h-16 md:w-16 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-360"
+            className="h-20 w-20 md:h-24 md:w-24 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-360"
             style={{ transformOrigin: "center" }}
           />
           <Image
@@ -98,164 +86,134 @@ export default function Header({ products = [] }) {
             // no_logo.png is a white wordmark — legible over the dark hero
             // images this transparent header floats above; may need a dark
             // variant later for pages whose top is light-colored.
-            className="h-10 md:h-12 w-auto cursor-pointer transition-transform duration-500 group-hover:scale-110"
+            className="h-16 md:h-20 w-auto cursor-pointer transition-transform duration-500 group-hover:scale-110"
           />
         </Link>
 
-        {/* ===== Desktop nav (right side) ===== */}
-        <nav className="hidden md:flex items-center gap-8 ml-auto">
-          <Link
-            href="/rbpn"
-            className={`text-sm font-medium tracking-wide transition-colors ${
-              pathname === "/rbpn" ? "text-white" : "text-gray-300 hover:text-white"
-            }`}
-          >
-            Find a Dealer
-          </Link>
-
-          {/* ===== Solutions mega-menu ===== */}
-          {/* Nothing to show (no product categorized yet) — omit the
-              trigger entirely rather than render a button whose
-              aria-expanded/chevron can flip open with no panel beneath it. */}
-          {solutionsGroups.length > 0 && (
-          <div
-            className="relative"
-            onMouseEnter={() => openDropdown("products", setProductsOpen)}
-            onMouseLeave={() => scheduleCloseDropdown("products", setProductsOpen)}
-          >
-            <button
-              onClick={() => setProductsOpen((v) => !v)}
-              className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors ${
-                isProductActive ? "text-white" : "text-gray-300 hover:text-white"
+        {/* ===== Desktop nav ===== */}
+        {/* Two groups, not one bunched-right cluster — matches the Figma:
+            primary links sit close to the logo, Announcements/Contact
+            us/Search are pinned to the far right, with the gap between
+            them absorbing the remaining header width. */}
+        <nav className="hidden md:flex items-center justify-between flex-1 ml-12 lg:ml-20">
+          <div className="flex items-center gap-8">
+            <Link
+              href="/"
+              className={`text-sm font-medium tracking-wide transition-colors ${
+                pathname === "/" ? "text-white" : "text-gray-300 hover:text-white"
               }`}
-              aria-expanded={productsOpen}
             >
-              Solutions
-              <ChevronDown
-                size={16}
-                className={`transition-transform duration-300 ${productsOpen ? "rotate-180" : ""}`}
-              />
-            </button>
+              Home
+            </Link>
 
-            <AnimatePresence>
-              {productsOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute right-0 top-full mt-3 w-[32rem] max-w-[90vw] rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden p-5 grid grid-cols-2 gap-x-6 gap-y-5"
-                >
-                  {solutionsGroups.map(({ category, items }) =>
-                    items.length === 1 ? (
-                      <Link
-                        key={category}
-                        href={`/${items[0].slug}`}
-                        className={`block text-sm font-semibold transition-colors ${
-                          pathname === `/${items[0].slug}` ? "text-white" : "text-gray-300 hover:text-white"
-                        }`}
-                      >
-                        {category}
-                      </Link>
-                    ) : (
-                      <div key={category}>
-                        <span className="block text-sm font-semibold text-white mb-2">{category}</span>
-                        <div className="flex flex-col gap-1.5">
-                          {items.map((product) => (
-                            <Link
-                              key={product.id}
-                              href={`/${product.slug}`}
-                              className={`text-sm transition-colors ${
-                                pathname === `/${product.slug}`
-                                  ? "text-white"
-                                  : "text-gray-300 hover:text-white"
-                              }`}
-                            >
-                              {product.name}
-                            </Link>
-                          ))}
+            <Link
+              href="/quick-links/about"
+              className={`text-sm font-medium tracking-wide transition-colors ${
+                pathname === "/quick-links/about" ? "text-white" : "text-gray-300 hover:text-white"
+              }`}
+            >
+              About Us
+            </Link>
+
+            {/* ===== Solutions mega-menu ===== */}
+            {/* Nothing to show (no product categorized yet) — omit the
+                trigger entirely rather than render a button whose
+                aria-expanded/chevron can flip open with no panel beneath it. */}
+            {solutionsGroups.length > 0 && (
+            <div
+              className="relative"
+              onMouseEnter={() => openDropdown("products", setProductsOpen)}
+              onMouseLeave={() => scheduleCloseDropdown("products", setProductsOpen)}
+            >
+              <button
+                onClick={() => setProductsOpen((v) => !v)}
+                className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors ${
+                  isProductActive ? "text-white" : "text-gray-300 hover:text-white"
+                }`}
+                aria-expanded={productsOpen}
+              >
+                Solutions
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform duration-300 ${productsOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {productsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute left-0 top-full mt-3 w-[32rem] max-w-[90vw] rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden p-5 grid grid-cols-2 gap-x-6 gap-y-5"
+                  >
+                    {solutionsGroups.map(({ category, items }) =>
+                      items.length === 1 ? (
+                        <Link
+                          key={category}
+                          href={`/${items[0].slug}`}
+                          className={`block text-sm font-semibold transition-colors ${
+                            pathname === `/${items[0].slug}` ? "text-white" : "text-gray-300 hover:text-white"
+                          }`}
+                        >
+                          {category}
+                        </Link>
+                      ) : (
+                        <div key={category}>
+                          <span className="block text-sm font-semibold text-white mb-2">{category}</span>
+                          <div className="flex flex-col gap-1.5">
+                            {items.map((product) => (
+                              <Link
+                                key={product.id}
+                                href={`/${product.slug}`}
+                                className={`text-sm transition-colors ${
+                                  pathname === `/${product.slug}`
+                                    ? "text-white"
+                                    : "text-gray-300 hover:text-white"
+                                }`}
+                              >
+                                {product.name}
+                              </Link>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                      )
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            )}
           </div>
-          )}
 
-          {/* ===== Business Solutions dropdown (MULI, Technical & After-Sales,
-              Training and Development — Figma redesign Phases 5-6) ===== */}
-          <div
-            className="relative"
-            onMouseEnter={() => openDropdown("business", setBusinessOpen)}
-            onMouseLeave={() => scheduleCloseDropdown("business", setBusinessOpen)}
-          >
-            <button
-              onClick={() => setBusinessOpen((v) => !v)}
-              className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors ${
-                isBusinessActive ? "text-white" : "text-gray-300 hover:text-white"
+          <div className="flex items-center gap-6">
+            <Link
+              href="/announcements"
+              className={`text-sm font-medium tracking-wide transition-colors ${
+                pathname === "/announcements" ? "text-white" : "text-gray-300 hover:text-white"
               }`}
-              aria-expanded={businessOpen}
             >
-              Business Solutions
-              <ChevronDown
-                size={16}
-                className={`transition-transform duration-300 ${businessOpen ? "rotate-180" : ""}`}
-              />
+              Announcements
+            </Link>
+
+            <Link
+              href="/quick-links/contact"
+              className="text-sm font-semibold tracking-wide bg-brand-blue hover:bg-blue-600 text-white px-5 py-2 rounded-full transition-colors"
+            >
+              Contact us
+            </Link>
+
+            {/* Decorative for now — no site search index exists yet to wire
+                this up to; flagged as a known gap, not a fabricated feature. */}
+            <button
+              type="button"
+              aria-label="Search"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              <Search size={18} />
             </button>
-
-            <AnimatePresence>
-              {businessOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute right-0 top-full mt-3 w-64 rounded-xl bg-brand-navy border border-white/10 shadow-xl overflow-hidden p-4 flex flex-col gap-2.5"
-                >
-                  {BUSINESS_SOLUTIONS_LINKS.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={`text-sm transition-colors ${
-                        pathname === link.href ? "text-white font-semibold" : "text-gray-300 hover:text-white"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
-
-          <Link
-            href="/announcements"
-            className={`text-sm font-medium tracking-wide transition-colors ${
-              pathname === "/announcements" ? "text-white" : "text-gray-300 hover:text-white"
-            }`}
-          >
-            Announcements
-          </Link>
-
-          <Link
-            href="/quick-links/about"
-            className={`text-sm font-medium tracking-wide transition-colors ${
-              pathname === "/quick-links/about" ? "text-white" : "text-gray-300 hover:text-white"
-            }`}
-          >
-            About
-          </Link>
-
-          <Link
-            href="/quick-links/contact"
-            className={`text-sm font-medium tracking-wide transition-colors ${
-              pathname === "/quick-links/contact" ? "text-white" : "text-gray-300 hover:text-white"
-            }`}
-          >
-            Contact
-          </Link>
         </nav>
 
         {/* ===== Mobile Menu Button ===== */}
@@ -357,56 +315,36 @@ export default function Header({ products = [] }) {
                 </>
               )}
 
-              {/* Business Solutions (expandable) */}
-              <button
-                onClick={() => setMobileBusinessOpen((v) => !v)}
-                className={`flex items-center justify-between py-3 text-base font-medium border-b border-white/10 ${
-                  isBusinessActive ? "text-white" : "text-gray-300"
-                }`}
-              >
-                Business Solutions
-                <ChevronDown
-                  size={18}
-                  className={`transition-transform duration-300 ${mobileBusinessOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              <AnimatePresence>
-                {mobileBusinessOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex flex-col overflow-hidden bg-white/5 rounded-lg my-2 px-4 py-2"
-                  >
-                    {BUSINESS_SOLUTIONS_LINKS.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setMenuOpen(false)}
-                        className={`text-sm py-2 block ${
-                          pathname === link.href ? "text-white" : "text-gray-300"
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
               {NAV_LINKS.slice(1).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className={`py-3 text-base font-medium border-b border-white/10 last:border-b-0 ${
+                  className={`py-3 text-base font-medium border-b border-white/10 ${
                     pathname === link.href ? "text-white" : "text-gray-300"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
+
+              <Link
+                href="/announcements"
+                onClick={() => setMenuOpen(false)}
+                className={`py-3 text-base font-medium border-b border-white/10 ${
+                  pathname === "/announcements" ? "text-white" : "text-gray-300"
+                }`}
+              >
+                Announcements
+              </Link>
+
+              <Link
+                href="/quick-links/contact"
+                onClick={() => setMenuOpen(false)}
+                className="mt-3 text-sm font-semibold tracking-wide bg-brand-blue hover:bg-blue-600 text-white px-5 py-3 rounded-full text-center transition-colors"
+              >
+                Contact us
+              </Link>
             </div>
           </motion.div>
         )}

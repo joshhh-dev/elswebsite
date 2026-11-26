@@ -15,8 +15,15 @@ export default function Footer() {
     { name: "Laundry for Firefighters", href: "../quick-links/firefighters" },
     { name: "Lagoon Professional", href: "../quick-links/lagoonP" },
     { name: "Preventive Maintenance Program", href: "../quick-links/pms" },
-    {name: "Contact Us", href: "../quick-links/contact" },
-
+    { name: "Contact Us", href: "../quick-links/contact" },
+    // Moved here from the header's top nav (Figma redesign simplification) —
+    // still reachable, just no longer in the main Header.js nav bar.
+    { name: "Find a Dealer", href: "../rbpn" },
+    { name: "Business Solutions", href: "../business-solutions" },
+    { name: "My Urban Laundry (MULI)", href: "../muli" },
+    { name: "Technical & After-Sales", href: "../technical-after-sales" },
+    { name: "Training and Development", href: "../training-development" },
+    { name: "EMPOWER360", href: "../empower360" },
   ];
 
   return (
