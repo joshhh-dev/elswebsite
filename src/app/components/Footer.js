@@ -6,24 +6,29 @@ import { motion } from "framer-motion";
 import { FaFacebookF, FaInstagram, FaArrowRight } from "react-icons/fa";
 
 export default function Footer() {
+  // Absolute paths — a relative "../..." href resolves differently depending
+  // on how many path segments deep the current page is (works by accident on
+  // 1-2 segment pages, silently breaks on 3-segment pages like
+  // /quick-links/article/{slug}, since the footer is rendered site-wide at
+  // varying depths). Absolute paths sidestep that entirely.
   const quickLinks = [
-    { name: "About Us", href: "../quick-links/about" },
-    { name: "Articles", href: "../quick-links/article" },
-    { name: "Laundry for Hospitality (HoReCa)", href: "../quick-links/horeca" },
-    { name: "Laundry for Healthcare (Hospitals)", href: "../quick-links/hospitals" },
-    { name: "Laundry for Spas, Gyms, and Salons", href: "../quick-links/spa" },
-    { name: "Laundry for Firefighters", href: "../quick-links/firefighters" },
-    { name: "Lagoon Professional", href: "../quick-links/lagoonP" },
-    { name: "Preventive Maintenance Program", href: "../quick-links/pms" },
-    { name: "Contact Us", href: "../quick-links/contact" },
+    { name: "About Us", href: "/quick-links/about" },
+    { name: "Articles", href: "/quick-links/article" },
+    { name: "Laundry for Hospitality (HoReCa)", href: "/quick-links/horeca" },
+    { name: "Laundry for Healthcare (Hospitals)", href: "/quick-links/hospitals" },
+    { name: "Laundry for Spas, Gyms, and Salons", href: "/quick-links/spa" },
+    { name: "Laundry for Firefighters", href: "/quick-links/firefighters" },
+    { name: "Lagoon Professional", href: "/quick-links/lagoonP" },
+    { name: "Preventive Maintenance Program", href: "/quick-links/pms" },
+    { name: "Contact Us", href: "/quick-links/contact" },
     // Moved here from the header's top nav (Figma redesign simplification) —
     // still reachable, just no longer in the main Header.js nav bar.
-    { name: "Find a Dealer", href: "../rbpn" },
-    { name: "Business Solutions", href: "../business-solutions" },
-    { name: "My Urban Laundry (MULI)", href: "../muli" },
-    { name: "Technical & After-Sales", href: "../technical-after-sales" },
-    { name: "Training and Development", href: "../training-development" },
-    { name: "EMPOWER360", href: "../empower360" },
+    { name: "Find a Dealer", href: "/rbpn" },
+    { name: "Business Solutions", href: "/business-solutions" },
+    { name: "My Urban Laundry (MULI)", href: "/muli" },
+    { name: "Technical & After-Sales", href: "/technical-after-sales" },
+    { name: "Training and Development", href: "/training-development" },
+    { name: "EMPOWER360", href: "/empower360" },
   ];
 
   return (
